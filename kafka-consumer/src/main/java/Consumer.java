@@ -55,8 +55,8 @@ public class Consumer {
             if (!additionalFile.exists()) {
                 additionalFile.createNewFile();
             }
-            fileWriter = new BufferedWriter(new FileWriter(file, StandardCharsets.UTF_8, true));
-            additionalFileWriter = new BufferedWriter(new FileWriter(additionalFile, StandardCharsets.UTF_8, true));
+            fileWriter = new BufferedWriter(new FileWriter(file, true));
+            additionalFileWriter = new BufferedWriter(new FileWriter(additionalFile, true));
         } catch (IOException e) {
             e.printStackTrace();
         }
