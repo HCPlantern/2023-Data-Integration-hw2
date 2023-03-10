@@ -1,3 +1,5 @@
+package com.nju;
+
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -7,7 +9,6 @@ import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.common.header.Header;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
