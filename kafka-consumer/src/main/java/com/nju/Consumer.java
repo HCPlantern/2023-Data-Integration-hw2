@@ -34,7 +34,8 @@ public class Consumer {
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
         // GROUP_ID 请使用学号，不同组应该使用不同的GROUP。
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "201250038");
-
+        // 防止加入消费者组较晚，导致丢失加入消息队列之前的消息
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_PLAINTEXT");
         props.put(SaslConfigs.SASL_MECHANISM, "PLAIN");
         props.put(SaslConfigs.SASL_JAAS_CONFIG,
