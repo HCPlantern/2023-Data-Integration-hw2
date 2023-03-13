@@ -111,23 +111,25 @@ object Hive2 {
         }
         case _ => {
         }
-        //利用第三方驱动 cc.blynk.clickhouse.ClickHouseDriver 完成
-        def store_to_clickhouse(df: DataFrame, dbtable: String): Unit = {
-            val write_maps = Map[String, String](
+            session.close()
+
+    }
+
+    //利用第三方驱动 cc.blynk.clickhouse.ClickHouseDriver 完成
+    def store_to_clickhouse(df: DataFrame, dbtable: String): Unit = {
+        val write_maps = Map[String, String](
             "batchsize" -> "2000"
             ,
             "isolationLevel" -> "NONE"
             ,
             "numPartitions" -> "1"
-            )
-            val url = "jdbc:clickhouse://192.168.1.24:8123/dm"
-            val pro = new Properties()
-            pro.put("driver", "cc.blynk.clickhouse.ClickHouseDriver")
-            df.write.mode(SaveMode.Append)
-            .options(write_maps)
-            .jdbc(url, dbtable, pro)
-        }
-        session.close()
+        )
+        val url = "jdbc:clickhouse://192.168.1.24:8123/dm"
+        val pro = new Properties()
+        pro.put("driver", "cc.blynk.clickhouse.ClickHouseDriver")
+        df.write.mode(SaveMode.Append)
+          .options(write_maps)
+          .jdbc(url, dbtable, pro)
     }
 
 }
