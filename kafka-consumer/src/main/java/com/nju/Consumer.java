@@ -1,6 +1,5 @@
 package com.nju;
 
-import org.apache.commons.lang3.time.StopWatch;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -8,15 +7,12 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.common.header.Header;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 
 /**
  * This Kafka consumer will consume data provided by TAs and save it to txt file.<br>
@@ -24,12 +20,11 @@ import java.util.concurrent.TimeUnit;
  * If data contains specific groupId, it will be saved to another txt file additionally.
  */
 public class Consumer {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Consumer.class);
+
     Properties props;
     KafkaConsumer<String, String> consumer;
     BufferedWriter fileWriter;
     BufferedWriter additionalFileWriter;
-    StopWatch stopWatch;
 
     public Consumer() {
         props = new Properties();
@@ -38,7 +33,7 @@ public class Consumer {
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
         // GROUP_ID 请使用学号，不同组应该使用不同的GROUP。
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "201250037");
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "201250038");
         // 防止加入消费者组较晚，导致丢失加入消息队列之前的消息
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_PLAINTEXT");
@@ -47,16 +42,13 @@ public class Consumer {
                 "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"student\" password=\"nju2023\";");
 
         consumer = new KafkaConsumer<>(props);
-        // subscribe to "transaction" topic 消费 transaction 主题的信息
+        // subscribe to "transaction" topic
         consumer.subscribe(Collections.singletonList("transaction"));
-        // 初始化 stop watch
-        stopWatch = new StopWatch();
 
         // Initialize file writer
         try {
-            // TODO: 先暂时使用绝对路径
-            String filePath = "C:\\Users\\BobbyHan\\Study\\2023Spring\\data_integration\\2023-Data-Intergration\\kafka-consumer\\src\\main\\resources\\kafka\\transaction.txt";
-            String additionalFilePath = "C:\\Users\\BobbyHan\\Study\\2023Spring\\data_integration\\2023-Data-Intergration\\kafka-consumer\\src\\main\\resources\\kafka\\transaction_additional.txt";
+            String filePath = "src/main/resources/kafka/transaction.txt";
+            String additionalFilePath = "src/main/resources/kafka/transaction_additional.txt";
             File file = new File(filePath);
             File additionalFile = new File(additionalFilePath);
             if (!file.exists()) {
@@ -120,9 +112,7 @@ public class Consumer {
 
     public static void main(String[] args) {
         Consumer consumer = new Consumer();
-        consumer.stopWatch.start();
         consumer.consume();
-        consumer.stopWatch.stop();
         consumer.close();
     }
 }
