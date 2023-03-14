@@ -4,20 +4,42 @@ import org.apache.spark.SparkConf
 import org.apache.spark.sql.functions.{lit, when}
 import org.apache.spark.sql.{SaveMode, SparkSession}
 
+/*
+  1.spark版本变更为2.3.3，部署模式local即可。也可探索其他模式。
+  2.由于远程调试出现的各种问题，且远程调试并非作业重点，这里重新建议使用spark-submit方式
+  3.本代码及spark命令均为最简单配置。如运行出现资源问题，请根据你的机器情况调整conf的配置以及spark-submit的参数，具体指分配CPU核数和分配内存。
+
+  调试：
+    当前代码中集成了spark-sql，可在开发机如windows运行调试;
+    需要在开发机本地下载hadoop，因为hadoop基于Linux编写，在开发机本地调试需要其中的一些文件，如模拟Linux目录系统的winutils.exe；
+    请修改System.setProperty("hadoop.home.dir", "your hadoop path in windows like E:\\hadoop-x.x.x")
+
+  部署：
+    注释掉System.setProperty("hadoop.home.dir", "your hadoop path in windows like E:\\hadoop-x.x.x")；
+    修改pom.xml中<scope.mode>compile</scope.mode>为<scope.mode>provided</scope.mode>
+    打包 mvn clean package
+    上传到你的Linux机器
+
+    注意在~/base_profile文件中配置$SPARK_HOME,并source ~/base_profile,或在bin目录下启动spark-submit
+    spark-submit Spark2DB-1.0.jar
+ */
+
+
 object Hive2 {
+    // parameters
     LoggerUtil.setSparkLogLevels()
 
     def main(args: Array[String]): Unit = {
         //System.setProperty("hadoop.home.dir", "D:\\hadoop-2.7.4")
-        //以local模式部署spark
+
         val conf = new SparkConf()
             .setAppName(this.getClass.getSimpleName)
-            .setMaster("local[4]")
+            .setMaster("local[*]")
 
         val session = SparkSession.builder()
             .config(conf)
             .getOrCreate()
-        //利用官方hive驱动连接远程hive静态仓库
+
         val reader = session.read.format("jdbc")
             .option("url", "jdbc:hive2://172.29.4.17:10000/default")
             .option("user", "student")
@@ -38,12 +60,8 @@ object Hive2 {
             df = df.drop("sys_source", "create_date", "update_date")
             //然后将每一行的数据映射成二元组（因为后续 reduceByKey 只能作用于二元组），该二元组的第一个元素是 uid ，第二个
             //元素是一个嵌套的二元组（依据con_type做映射），该嵌套二元组的内容是 contact_phone 和 contact_address
-            df.rdd.map(row => (row.getString(0),
-                                    (if (row.getString(1).equals("TEL") || row.getString(1).equals("OTH") || row.getString(1).equals("MOB"))
-            row.getString(2).trim
-            else "",
-                if (!row.getString(1).equals("TEL") && !row.getString(1).equals("OTH") && !row.getString(1).equals("MOB"))
-            row.getString(2).trim
+            df.rdd.map(row => (row.getString(0), (if (row.getString(1).equals("TEL") || row.getString(1).equals("OTH") || row.getString(1).equals("MOB"))
+                row.getString(2).trim else "", if (!row.getString(1).equals("TEL") && !row.getString(1).equals("OTH") && !row.getString(1).equals("MOB")) row.getString(2).trim
             else "")))
             //接着进行 reduceByKey操作 ，将任意相同的 uid 的行数据进行合并。这里以合并 contact_phone 列简单介绍一下，如果
             //第一行的 contact_phone 列数据不存在前第二行该列有数据，则直接将 contact_phone 设置为第二行的数据否则则需要考虑
@@ -56,12 +74,12 @@ object Hive2 {
                 // x的 contact_phone列为空
                 if (contact_phone.equals("") || contact_phone.equals("-") || contact_phone.equals("无") || contact_phone ==
                   null) {
-                     // y的 contact_phone列不为空
+                    // y的 contact_phone列不为空
                     if (!y._1.equals("") && !y._1.equals("-") && !y._1.equals("无") && !(y._1 == null)) {
                         contact_phone = y._1
                     }
                 } else {
-                     // y的 contact_phone列不为空
+                    // y的 contact_phone列不为空
                     if (!y._1.equals("") && !y._1.equals("-") && !y._1.equals("无") && !contact_phone.contains(y._1) && !(y._1 == null)) {
                         contact_phone += "," + y._1
                     }
@@ -69,7 +87,7 @@ object Hive2 {
                 // x的 contact_phone列为空
                 if (contact_address.equals("") || contact_address.equals("-") || contact_address.equals("无") ||
                   contact_address == null) {
-                     // y的 contact_phone列不为空
+                    // y的 contact_phone列不为空
                     if (!y._2.equals("") && !y._2.equals("-") && !y._2.equals("无") && !(y._2 == null)) {
                         contact_address = y._2
                     }
@@ -111,7 +129,7 @@ object Hive2 {
         }
         case _ => {
         }
-            session.close()
+
 
     }
 
@@ -130,6 +148,8 @@ object Hive2 {
         df.write.mode(SaveMode.Append)
           .options(write_maps)
           .jdbc(url, dbtable, pro)
+    }
+        session.close()
     }
 
 }
