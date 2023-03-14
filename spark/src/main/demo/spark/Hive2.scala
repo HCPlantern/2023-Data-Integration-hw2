@@ -26,38 +26,38 @@ import org.apache.spark.sql.{SaveMode, SparkSession}
 
 
 object Hive2 {
-    // parameters
-    LoggerUtil.setSparkLogLevels()
+  // parameters
+  LoggerUtil.setSparkLogLevels()
 
-    def main(args: Array[String]): Unit = {
-        //System.setProperty("hadoop.home.dir", "D:\\hadoop-2.7.4")
+  def main(args: Array[String]): Unit = {
+    //System.setProperty("hadoop.home.dir", "D:\\hadoop-2.7.4")
 
-        val conf = new SparkConf()
-            .setAppName(this.getClass.getSimpleName)
-            .setMaster("local[*]")
+    val conf = new SparkConf()
+      .setAppName(this.getClass.getSimpleName)
+      .setMaster("local[*]")
 
-        val session = SparkSession.builder()
-            .config(conf)
-            .getOrCreate()
+    val session = SparkSession.builder()
+      .config(conf)
+      .getOrCreate()
 
-        val reader = session.read.format("jdbc")
-            .option("url", "jdbc:hive2://172.29.4.17:10000/default")
-            .option("user", "student")
-            .option("password", "nju2023")
-            .option("driver", "org.apache.hive.jdbc.HiveDriver")
-        val registerHiveDqlDialect = new RegisterHiveSqlDialect()
-        registerHiveDqlDialect.register()
+    val reader = session.read.format("jdbc")
+      .option("url", "jdbc:hive2://172.29.4.17:10000/default")
+      .option("user", "student")
+      .option("password", "nju2023")
+      .option("driver", "org.apache.hive.jdbc.HiveDriver")
+    val registerHiveDqlDialect = new RegisterHiveSqlDialect()
+    registerHiveDqlDialect.register()
 
-        val tblNameDsts = List("pri_cust_contact_info")
+    val tblNameDsts = List("pri_cust_contact_info")
 
-        for (tblNameDst <- tblNameDsts) {
-            var df = reader.option("dbtable", tblNameDst).load()
-            val columnNames = df.columns.toList.map(name => name.substring(tblNameDst.length + 1)).toArray
-            df = df.toDF(columnNames: _*)
+    for (tblNameDst <- tblNameDsts) {
+      var df = reader.option("dbtable", tblNameDst).load()
+      val columnNames = df.columns.toList.map(name => name.substring(tblNameDst.length + 1)).toArray
+      df = df.toDF(columnNames: _*)
 
-            // code
-        }
-        session.close()
+      // code
     }
+    session.close()
+  }
 
 }
