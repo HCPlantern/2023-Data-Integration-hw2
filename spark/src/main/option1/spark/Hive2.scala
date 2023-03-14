@@ -1,8 +1,12 @@
 package spark
 
 import org.apache.spark.SparkConf
-import org.apache.spark.sql.functions.{lit, when}
-import org.apache.spark.sql.{SaveMode, SparkSession}
+import org.apache.spark.sql.functions.col
+import org.apache.spark.sql.types.{StringType, StructField, StructType}
+import org.apache.spark.sql.{Row, SaveMode, SparkSession}
+
+import java.util.Properties
+import scala.collection.mutable.ListBuffer
 
 object Hive2 {
   LoggerUtil.setSparkLogLevels()
@@ -34,8 +38,7 @@ object Hive2 {
     for (tblNameDst <- tblNameDsts) {
       var df = reader.option("dbtable", tblNameDst).load()
       // 去掉列名中的表名前缀，方便解析
-      val columnNames = df.columns.toList.map(name => name.substring(tblNa
-        meDst.length + 1)
+      val columnNames = df.columns.toList.map(name => name.substring(tblNameDst.length + 1)
       ).toArray
       df = df.toDF(columnNames: _*)
       // 过滤uid为空的数据
@@ -114,3 +117,4 @@ object Hive2 {
     session.close()
 
   }
+}
