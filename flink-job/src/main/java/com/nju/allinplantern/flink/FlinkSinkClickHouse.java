@@ -1,26 +1,14 @@
 package com.nju.allinplantern.flink;
 
-import cn.hutool.core.text.CharSequenceUtil;
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONObject;
-import com.nju.allinplantern.flink.pojo.Event;
-import com.nju.allinplantern.flink.pojo.eventbody.EventBody;
-import com.nju.allinplantern.flink.pojo.eventbody.Shop;
-import com.nju.allinplantern.flink.utils.Converter;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
-import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
-import org.apache.flink.util.Collector;
-import org.apache.flink.util.OutputTag;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.config.SaslConfigs;
 
-import java.util.HashMap;
 import java.util.Properties;
 
 /**
@@ -35,6 +23,7 @@ public class FlinkSinkClickHouse {
         // TODO: 1.消费 kafka 2.数据 ETL 3.sink->ck
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
+        // 设置对应的 topic
         String topic = "transaction";
         Properties props = new Properties();
         // kafka server address
@@ -54,30 +43,6 @@ public class FlinkSinkClickHouse {
         consumer.setStartFromGroupOffsets();
         consumer.setStartFromEarliest();
         DataStreamSource<String> source = env.addSource(consumer);
-        SingleOutputStreamOperator<EventBody> dataStream = source.process(new ProcessFunction<String, EventBody>() {
-            @Override
-            public void processElement(String s, ProcessFunction<String, EventBody>.Context context, Collector<EventBody> collector) throws Exception {
-                // 解析消费到的信息
-                HashMap map = JSON.parseObject(s, HashMap.class);
-                String eventDate = (String) map.get("eventDate");
-                String eventType = (String) map.get("eventType");
-                String tableName = Converter.eventTypeToTableName(eventType);
-                // 得到对应的 eventBody
-                EventBody eventBody = (EventBody) ((JSONObject) map.get("eventBody")).toJavaObject(Class.forName("pojo.eventBody." + CharSequenceUtil.upperFirst(eventType)));
-                // TODO: 交易数据不合法
-                if (!eventBody.isValid()) {
-                    return;
-                }
-                Event event = Event.builder()
-                        .eventDate(eventDate)
-                        .eventType(eventType)
-                        .eventBody(eventBody)
-                        .tableName(tableName)
-                        .build();
-                // TODO: 转换成具体的交易数据
-                context.output(new OutputTag<>("shop"), (Shop) eventBody);
-            }
-        });
-        dataStream.getSideOutput(new OutputTag<>("shop"));
+
     }
 }

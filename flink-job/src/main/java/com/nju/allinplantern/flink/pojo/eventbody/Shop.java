@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.flink.connector.jdbc.JdbcConnectionOptions;
-import org.apache.flink.streaming.api.functions.sink.SinkFunction;
+
+import java.math.BigDecimal;
 
 /**
  * 商户交易明细
@@ -16,41 +16,36 @@ import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 @Builder
 public class Shop extends EventBody {
     // 是否都用 String ?
-    private String tranChanel;
+    private String tran_channel;
 
-    private String orderCode;
+    private String order_code;
 
-    private String shopCode;
+    private String shop_code;
 
-    private String shopName;
+    private String shop_name;
 
-    private String hlwTranType;
+    private String hlw_tran_type;
 
-    private String tranDate;
+    private String tran_date;
 
-    private String tranTime;
+    private String tran_time;
 
-    private String tranAmount;
+    private BigDecimal tran_amount;
 
-    private String currentStatus;
+    private String current_status;
 
-    private String scoreNum;
+    private String score_num;
 
-    private String payChannel;
+    private String pay_channel;
 
     private String uid;
 
-    private String legalName;
+    private String legal_name;
 
-    private String etlDt;
+    private String etl_dt;
 
     @Override
     public boolean isValid() {
         return false;
-    }
-
-    // TODO: sink函数(优化实现 )
-    public static SinkFunction<Shop> SinkCreator(String tableName, int batchSize, JdbcConnectionOptions options) {
-        return null;
     }
 }

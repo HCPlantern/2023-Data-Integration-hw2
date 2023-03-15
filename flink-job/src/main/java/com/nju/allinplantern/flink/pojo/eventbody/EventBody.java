@@ -10,5 +10,4 @@ import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 public abstract class EventBody {
     // TODO: 判断是否合法
     public abstract boolean isValid();
-
 }
