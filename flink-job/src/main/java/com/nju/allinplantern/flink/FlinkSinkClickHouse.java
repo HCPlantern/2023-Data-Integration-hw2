@@ -43,6 +43,7 @@ public class FlinkSinkClickHouse {
         consumer.setStartFromGroupOffsets();
         consumer.setStartFromEarliest();
         DataStreamSource<String> source = env.addSource(consumer);
+        // TODO: main 函数
 
     }
 }
