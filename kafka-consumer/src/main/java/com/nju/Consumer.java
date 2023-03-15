@@ -49,8 +49,8 @@ public class Consumer {
 
         // Initialize file writer
         try {
-            String filePath = "kafka-consumer/src/main/resources/kafka/transaction.txt";
-            String additionalFilePath = "kafka-consumer/src/main/resources/kafka/transaction_additional.txt";
+            String filePath = "D:\\大三下课程\\数据集成\\第二次作业\\2023-Data-Intergration\\kafka-consumer\\src\\main\\resources\\kafka\\transaction.txt";
+            String additionalFilePath = "D:\\大三下课程\\数据集成\\第二次作业\\2023-Data-Intergration\\kafka-consumer\\src\\main\\resources\\kafka\\transaction_additional.txt";
             File file = new File(filePath);
             File additionalFile = new File(additionalFilePath);
             if (!file.exists()) {
@@ -93,7 +93,6 @@ public class Consumer {
      *
      * @param data String data to write.
      */
-
     private void writeToFile(Writer writer, String data) {
         try {
             writer.write(data);
