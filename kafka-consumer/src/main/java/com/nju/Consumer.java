@@ -8,12 +8,10 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.common.header.Header;
 
-import javax.swing.plaf.IconUIResource;
 import java.io.*;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Properties;
 
 /**
@@ -49,8 +47,8 @@ public class Consumer {
 
         // Initialize file writer
         try {
-            String filePath = "kafka-consumer/src/main/resources/kafka/transaction.txt";
-            String additionalFilePath = "kafka-consumer/src/main/resources/kafka/transaction_additional.txt";
+            String filePath = "src/main/resources/kafka/transaction.txt";
+            String additionalFilePath = "src/main/resources/kafka/transaction_additional.txt";
             File file = new File(filePath);
             File additionalFile = new File(additionalFilePath);
             if (!file.exists()) {
