@@ -30,6 +30,17 @@
             <scope>${scope.mode}</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>2.0.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>2.0.6</version>
+        </dependency>
+
         <!-- clickhouse -->
         <dependency>
             <groupId>ru.yandex.clickhouse</groupId>
