@@ -17,9 +17,6 @@ import java.math.BigDecimal;
 public class Huanb extends EventBody{
     private String tran_flag;
 
-
-
-
     private String uid;
 
     private String cust_name;
@@ -44,7 +41,7 @@ public class Huanb extends EventBody{
 
     private BigDecimal pprd_rfn_amt;
 
-    private String pprd_amotz_intr;
+    private BigDecimal pprd_amotz_intr;
 
     private String tran_log_no;
 
