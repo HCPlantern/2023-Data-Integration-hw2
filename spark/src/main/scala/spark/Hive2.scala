@@ -20,20 +20,21 @@ import scala.collection.mutable.ListBuffer
  */
 
 /**
- * 首先处理ETL小作业：pri_cust_contact_info表，工作如下:
- * 1. 去掉列名前缀
+ * 首先处理ETL小作业：pri_cust_contact_info表，工作如下: <br/>
+ * 1. 去掉列名前缀<br/>
  * 2. 过滤无效行("contact != '⽆' and contact != '-' and contact != ''")
- * 3. 去掉不需要显示的列("sys_source", "create_date", "update_date")
- * 4. 丢弃含有null或者NAN的⾏
- * 5. 对于联系⽅式去重uid
- * 6. 添加新列（contact_phone, contact_address)
- * 7. ReduceByKey合并相同uid的数据, con_type为TEL、OTH、MOB的，contact合并到contact_phone字段，用","分割 ,con_type为其他类型的，contact合并到contact_address字段，用","分割
  *
- * 然后处理剩下的九张表：
- * 1. 去掉列名前缀
- * 2. 删掉空值列
- * 3. 过滤uid为空的数据
- * 4. 去除重复行
+ * 3. 去掉不需要显示的列("sys_source", "create_date", "update_date") <br/>
+ * 4. 丢弃含有null或者NAN的⾏ <br/>
+ * 5. 对于联系⽅式去重uid<br/>
+ * 6. 添加新列（contact_phone, contact_address)<br/>
+ * 7. ReduceByKey合并相同uid的数据, con_type为TEL、OTH、MOB的，contact合并到contact_phone字段，用","分割 ,con_type为其他类型的，contact合并到contact_address字段，用","分割<br/>
+ * 8. 存入clickhouse <br/>
+ * 然后处理剩下的九张表：<br/>
+ * 1. 去掉列名前缀<br/>
+ * 2. 删掉空值列<br/>
+ * 3. 过滤uid为空的数据<br/>
+ * 4. 去除重复行<br/>
  * 5. 存入clickhouse
  */
 object Hive2 {
