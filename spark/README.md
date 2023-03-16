@@ -1,12 +1,13 @@
-# Flink Job
+# spark
 
 ## 简介
 
-从助教提供的 Hive 仓库获取数据并在 Spark 中 ETL 后存入 Clickhouse。
+从远程 Hive 仓库中读取数据并处理保存到 clickhouse 中
 
 负责人：华广松、张月明
 
 ## 细节说明
 
-## 效果展示
+细节
 
+## 效果展示

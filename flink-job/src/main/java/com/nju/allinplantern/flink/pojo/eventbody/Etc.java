@@ -8,17 +8,32 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
 /**
- * 社保医保交易
+ * ETC交易
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Sbyb extends EventBody {
+public class Etc extends EventBody {
     /**
      * 证件号码
      */
     private String uid;
+
+    /**
+     * ETC账号
+     */
+    private String etc_acct;
+
+    /**
+     * 卡号
+     */
+    private String card_no;
+
+    /**
+     * 车牌号
+     */
+    private String car_no;
 
     /**
      * 客户名称
@@ -31,19 +46,9 @@ public class Sbyb extends EventBody {
     private String tran_date;
 
     /**
-     * 交易状态
+     * 交易时间
      */
-    private String tran_sts;
-
-    /**
-     * 交易机构号
-     */
-    private String tran_org;
-
-    /**
-     * 操作柜员号
-     */
-    private String tran_teller_no;
+    private String tran_time;
 
     /**
      * 交易金额
@@ -51,14 +56,24 @@ public class Sbyb extends EventBody {
     private BigDecimal tran_amt_fen;
 
     /**
-     * 交易类型
+     * 实收金额
      */
-    private String tran_type;
+    private BigDecimal real_amt;
 
     /**
-     * 返回信息
+     * 优惠金额
      */
-    private String return_msg;
+    private BigDecimal conces_amt;
+
+    /**
+     * 通行路程
+     */
+    private String tran_place;
+
+    /**
+     * 手机号码
+     */
+    private String mob_phone;
 
     /**
      * 数据日期

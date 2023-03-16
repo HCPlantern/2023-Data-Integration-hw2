@@ -8,32 +8,32 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
 /**
- * 贷款还息明细
+ * 个人网银交易
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Huanx extends EventBody {
-    /**
-     * 还息类型
-     */
-    private String tran_flag;
-
+public class Grwy extends EventBody {
     /**
      * 证件号码
      */
     private String uid;
 
     /**
-     * 客户名称
+     * 模块渠道代号
      */
-    private String cust_name;
+    private String mch_channel;
 
     /**
-     * 账号
+     * 登录类型
      */
-    private String acct_no;
+    private String login_type;
+
+    /**
+     * 电子银行客户号
+     */
+    private String ebank_cust_no;
 
     /**
      * 交易日期
@@ -46,64 +46,54 @@ public class Huanx extends EventBody {
     private String tran_time;
 
     /**
-     * 利息
-     */
-    private BigDecimal tran_amt;
-
-    /**
-     * 计息本金
-     */
-    private BigDecimal cac_intc_pr;
-
-    /**
      * 交易代码
      */
     private String tran_code;
 
     /**
-     * 借贷别
+     * 交易状态
      */
-    private String dr_cr_code;
+    private String tran_sts;
 
     /**
-     * 还款期数
+     * 返回码
      */
-    private Integer pay_term;
+    private String return_code;
 
     /**
-     * 操作柜员号
+     * 返回信息
      */
-    private String tran_teller_no;
+    private String return_msg;
 
     /**
-     * 计息起始日期
+     * 业务系统类型
      */
-    private String intc_strt_date;
+    private String sys_type;
 
     /**
-     * 计息截止日期
+     * 付款人账号
      */
-    private String intc_end_date;
+    private String payer_acct_no;
 
     /**
-     * 利率
+     * 转出户名
      */
-    private BigDecimal intr;
+    private String payer_acct_name;
 
     /**
-     * 交易流水号
+     * 收款人账号
      */
-    private String tran_log_no;
+    private String payee_acct_no;
 
     /**
-     * 交易类型
+     * 收款人户名
      */
-    private String tran_type;
+    private String payee_acct_name;
 
     /**
-     * 摘要
+     * 交易金额
      */
-    private String dscrp_code;
+    private BigDecimal tran_amt;
 
     /**
      * 数据日期
