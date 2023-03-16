@@ -3,6 +3,9 @@ package spark
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.internal.Logging
 
+/**
+ * 注册工具类
+ */
 object LoggerUtil extends Logging {
   def setSparkLogLevels(level: Level = Level.WARN) {
     val log4jInitialized = Logger.getRootLogger.getAllAppenders.hasMoreElements
