@@ -43,7 +43,7 @@ object Hive2 {
 
     def main(args: Array[String]): Unit = {
         //部署时注释掉
-        System.setProperty("hadoop.home.dir", "C:\\hadoop")
+        //System.setProperty("hadoop.home.dir", "C:\\hadoop")
         //以local模式部署spark
         val conf = new SparkConf()
           .setAppName(this.getClass.getSimpleName)
@@ -56,7 +56,7 @@ object Hive2 {
 
         //利用官方hive驱动连接远程hive静态仓库，DataFrameReader
         val reader = session.read.format("jdbc")
-          .option("url", "jdbc:hive2://clickhouse:10000/default")
+          .option("url", "jdbc:hive2://172.29.4.17:10000/default")
           .option("user", "student")
           .option("password", "nju2023")
           .option("driver", "org.apache.hive.jdbc.HiveDriver")
