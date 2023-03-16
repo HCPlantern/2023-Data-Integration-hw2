@@ -15,24 +15,30 @@
         <flink-clients_2.11.version>1.11.1</flink-clients_2.11.version>
         <flink-connector-kafka_2.11.version>1.11.1</flink-connector-kafka_2.11.version>
         <flink-table-api-java-bridge_2.11.version>1.11.1</flink-table-api-java-bridge_2.11.version>
-        <flink-streaming-java_2.10.version>1.3.2</flink-streaming-java_2.10.version>
-        <flink-connector-jdbc_2.12.version>1.12.0</flink-connector-jdbc_2.12.version>
-        <fastjson.version>2.0.22</fastjson.version>
+        <flink-streaming-java_2.11.version>1.11.1</flink-streaming-java_2.11.version>
+        <flink-connector-jdbc_2.11.version>1.11.1</flink-connector-jdbc_2.11.version>
+        <fastjson.version>2.0.25</fastjson.version>
         <kafka_2.13.version>3.1.0</kafka_2.13.version>
-        <kafka-clients.version>1.0.2</kafka-clients.version>
+        <kafka-clients.version>3.4.0</kafka-clients.version>
         <clickhouse-jdbc.version>0.1.54</clickhouse-jdbc.version>
         <slf4j-api.version>2.0.6</slf4j-api.version>
         <slf4j-simple.version>2.0.6</slf4j-simple.version>
         <commons-lang3.version>3.12.0</commons-lang3.version>
-        <hutool-all.version>5.8.9</hutool-all.version>
+        <hutool-all.version>5.8.11</hutool-all.version>
     </properties>
 
     <dependencies>
         <!--flink 相关依赖-->
         <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <version>2.11.8</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-java</artifactId>
             <version>${flink-java.version}</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
@@ -55,13 +61,13 @@
 
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-streaming-java_2.10</artifactId>
-            <version>${flink-streaming-java_2.10.version}</version>
+            <artifactId>flink-streaming-java_2.11</artifactId>
+            <version>1.11.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-jdbc_2.12</artifactId>
-            <version>${flink-connector-jdbc_2.12.version}</version>
+            <artifactId>flink-connector-jdbc_2.11</artifactId>
+            <version>${flink-connector-jdbc_2.11.version}</version>
         </dependency>
 
 
@@ -121,6 +127,13 @@
             <version>1.18.22</version>
             <scope>compile</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>4.4</version>
+        </dependency>
+
 
 
     </dependencies>

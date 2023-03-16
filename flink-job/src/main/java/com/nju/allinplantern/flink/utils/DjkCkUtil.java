@@ -14,6 +14,7 @@ import java.util.Map;
 
 
 public class DjkCkUtil extends RichSinkFunction<Djk> {
+    private static final String url = "jdbc:clickhouse://clickhouse:8123/dm";
     // ck 连接
     private ClickHouseConnection connection;
 
@@ -38,7 +39,6 @@ public class DjkCkUtil extends RichSinkFunction<Djk> {
     @Override
     public void invoke(Djk value, Context context) throws Exception {
         // 具体的sink处理
-        String url = "jdbc:clickhouse://172.17.188.153:8123";
         ClickHouseProperties properties = new ClickHouseProperties();
         properties.setUser("default");
         properties.setPassword("16d808ef");
