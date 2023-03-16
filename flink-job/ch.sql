@@ -929,7 +929,7 @@ ENGINE = MergeTree
 ORDER BY uid;
 
 CREATE TABLE dm.pri_star_info (
-    uid String
+    uid String,
     star_level String
 )
 ENGINE = MergeTree
