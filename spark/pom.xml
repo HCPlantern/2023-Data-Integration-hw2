@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>nju.edu</groupId>
+    <groupId>com.example</groupId>
     <artifactId>spark</artifactId>
     <version>1.0</version>
 
@@ -30,16 +30,16 @@
             <scope>${scope.mode}</scope>
         </dependency>
 
-        <dependency>
+<!--        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>2.0.6</version>
-        </dependency>
-        <dependency>
+        </dependency>-->
+<!--        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <version>2.0.6</version>
-        </dependency>
+        </dependency>-->
 
         <!-- clickhouse -->
         <dependency>
