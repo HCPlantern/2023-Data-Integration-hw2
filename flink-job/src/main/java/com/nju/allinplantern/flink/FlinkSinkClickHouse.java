@@ -41,6 +41,13 @@ public class FlinkSinkClickHouse {
      * 表驱动
      */
     private static final Map<String, Class<? extends EventBody>> typeClazzMap = MapUtil.ofEntries(
+            MapUtil.entry("contract", Contract.class),
+            MapUtil.entry("djk", Djk.class),
+            MapUtil.entry("dsf", Dsf.class),
+            MapUtil.entry("duebill", Duebill.class),
+            MapUtil.entry("etc", Etc.class),
+            MapUtil.entry("grwy", Grwy.class),
+            MapUtil.entry("gzdf", Gzdf.class),
             MapUtil.entry("huanb", Huanb.class),
             MapUtil.entry("huanx", Huanx.class),
             MapUtil.entry("sa", Sa.class),
@@ -50,6 +57,13 @@ public class FlinkSinkClickHouse {
             MapUtil.entry("sjyh", Sjyh.class)
     );
     private static final Map<Class<? extends EventBody>, RichSinkFunction> clazzUtilMap = MapUtil.ofEntries(
+            MapUtil.entry(Contract.class, new ContractCkUtil()),
+            MapUtil.entry(Djk.class, new DjkCkUtil()),
+            MapUtil.entry(Dsf.class, new DsfCkUtil()),
+            MapUtil.entry(Duebill.class, new DuebillCkUtil()),
+            MapUtil.entry(Etc.class, new EtcCkUtil()),
+            MapUtil.entry(Grwy.class, new GrwyCkUtil()),
+            MapUtil.entry(Gzdf.class, new GzdfCkUtil()),
             MapUtil.entry(Huanb.class, new HuanbCkUtil()),
             MapUtil.entry(Huanx.class, new HuanxCkUtil()),
             MapUtil.entry(Sa.class, new SaCkUtil()),
