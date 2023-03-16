@@ -5,8 +5,7 @@ import cn.hutool.core.map.MapUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.nju.allinplantern.flink.pojo.eventbody.*;
-import com.nju.allinplantern.flink.utils.HuanbCkUtil;
-import com.nju.allinplantern.flink.utils.SjyhCkUtil;
+import com.nju.allinplantern.flink.utils.*;
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
@@ -52,11 +51,11 @@ public class FlinkSinkClickHouse {
     );
     private static final Map<Class<? extends EventBody>, RichSinkFunction> clazzUtilMap = MapUtil.ofEntries(
             MapUtil.entry(Huanb.class, new HuanbCkUtil()),
-            MapUtil.entry(Huanx.class, new HuanbCkUtil()),
-            MapUtil.entry(Sa.class, new HuanbCkUtil()),
-            MapUtil.entry(Sbyb.class, new HuanbCkUtil()),
-            MapUtil.entry(Sdrq.class, new HuanbCkUtil()),
-            MapUtil.entry(Shop.class, new HuanbCkUtil()),
+            MapUtil.entry(Huanx.class, new HuanxCkUtil()),
+            MapUtil.entry(Sa.class, new SaCkUtil()),
+            MapUtil.entry(Sbyb.class, new SbybCkUtil()),
+            MapUtil.entry(Sdrq.class, new SdrqCkUtil()),
+            MapUtil.entry(Shop.class, new ShopCkUtil()),
             MapUtil.entry(Sjyh.class, new SjyhCkUtil())
     );
     private static final String[] eventTypes = {"contract", "djk", "dsf", "duebill", "etc", "grwy", "gzdf", "huanb", "huanx", "sa", "sbyb", "sdrq", "shop", "sjyh"};
@@ -120,7 +119,6 @@ public class FlinkSinkClickHouse {
     }
 
     public static void main(String[] args) throws Exception {
-        // TODO: 1.消费 kafka 2.数据 ETL 3.sink->ck
         FlinkSinkClickHouse flinkSinkClickHouse = new FlinkSinkClickHouse();
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
@@ -137,7 +135,6 @@ public class FlinkSinkClickHouse {
         DataStreamSource<String> source = env.addSource(consumer);
         // 分流数据源
         List<DataStream<String>> dataStreams = flinkSinkClickHouse.splitDataStream(source);
-        // 先测试一下
         for (int i = 0; i < dataStreams.size(); i++) {
             Class<? extends EventBody> eventDataClazz = typeClazzMap.get(eventTypes[i]);
             RichSinkFunction richSinkFunction = clazzUtilMap.get(eventDataClazz);

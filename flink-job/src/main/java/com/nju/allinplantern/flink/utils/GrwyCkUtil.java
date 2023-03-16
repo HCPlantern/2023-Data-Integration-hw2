@@ -38,7 +38,7 @@ public class GrwyCkUtil extends RichSinkFunction<Grwy> {
     @Override
     public void invoke(Grwy value, Context context) throws Exception {
         // 具体的sink处理
-        String url = "jdbc:clickhouse://172.17.188.153:8123";
+        String url = "jdbc:clickhouse://172.17.188.153:8123/dm";
         ClickHouseProperties properties = new ClickHouseProperties();
         properties.setUser("default");
         properties.setPassword("16d808ef");
