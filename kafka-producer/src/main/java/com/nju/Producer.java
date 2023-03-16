@@ -44,29 +44,29 @@ public class Producer {
             producer.close();
         }*/
 
-        int sleep_counter=0;
+        int sleep_counter = 0;
         assert tempList != null;
-        for(File f:tempList){
-            try{
-                FileInputStream fis=new FileInputStream(f);
-                BufferedReader br=new BufferedReader(new InputStreamReader(fis));
-                String readin="";
-                while(true){
-                    try{
-                        if((readin=br.readLine())!=null){
-                            ProducerRecord<String, String> record=new ProducerRecord<>("hgs",0,null, readin);
+        for (File f : tempList) {
+            try {
+                FileInputStream fis = new FileInputStream(f);
+                BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+                String readin = "";
+                while (true) {
+                    try {
+                        if ((readin = br.readLine()) != null) {
+                            ProducerRecord<String, String> record = new ProducerRecord<>("hgs", 0, null, readin);
                             System.out.println(readin);
                             producer.send(record);
-                            if(++sleep_counter==1024){
-                                sleep_counter=0;
+                            if (++sleep_counter == 1024) {
+                                sleep_counter = 0;
                                 Thread.sleep(50);
                             }
-                        }else break;
-                    }catch(Exception e){
+                        } else break;
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
-            }catch(FileNotFoundException e){
+            } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
         }
