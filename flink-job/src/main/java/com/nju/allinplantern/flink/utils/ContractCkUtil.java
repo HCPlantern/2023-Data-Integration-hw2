@@ -14,6 +14,8 @@ import java.util.Map;
 
 
 public class ContractCkUtil extends RichSinkFunction<Contract> {
+    private static final String url = "jdbc:clickhouse://clickhouse:8123/dm";
+
     // ck 连接
     private ClickHouseConnection connection;
 
@@ -38,7 +40,6 @@ public class ContractCkUtil extends RichSinkFunction<Contract> {
     @Override
     public void invoke(Contract value, Context context) throws Exception {
         // 具体的sink处理
-        String url = "jdbc:clickhouse://172.17.188.153:8123/dm";
         ClickHouseProperties properties = new ClickHouseProperties();
         properties.setUser("default");
         properties.setPassword("16d808ef");
