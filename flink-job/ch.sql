@@ -70,7 +70,6 @@ CREATE TABLE dm.dm_v_as_djk_info (
     etc_date String,
     issue_mode String,
     issue_mode_name String,
-    bal decimal(18,2),
     active_date String,
     clsd_date String,
     dlay_mths int,
@@ -90,8 +89,6 @@ CREATE TABLE dm.dm_v_as_djkfq_info (
     cust_name String,
     uid String,
     mob_phone String,
-    mge_org String,
-    recom_no String,
     mp_number String,
     mp_type String,
     mp_status String,
@@ -679,15 +676,11 @@ CREATE TABLE dm.pri_cust_asset_acct_info (
     curr_type String,
     subject_no String,
     prod_type String,
-    term String,
-    rate decimal(18,0),
-    auto_dp_flg String,
     belong_org String,
     exam_org String,
     open_org String,
     open_date String,
     open_teller_no String,
-    matu_date String,
     acct_char String,
     deps_type String,
     prod_code String,
@@ -797,12 +790,8 @@ ORDER BY uid;
 
 CREATE TABLE dm.pri_cust_contact_info (
     uid String,
-    con_type String,
-    contact String,
-    sys_source String,
-    create_date String,
-    update_date String,
-    etl_dt String
+    contact_phone String,
+    contact_address String
 )
 ENGINE = MergeTree
 ORDER BY uid;
@@ -875,7 +864,6 @@ CREATE TABLE dm.pri_cust_liab_acct_info (
     pro_char_ori String,
     pay_type String,
     grntr_name String,
-    grntr_cert_no String,
     guar_no String,
     guar_right_no String,
     guar_name String,
