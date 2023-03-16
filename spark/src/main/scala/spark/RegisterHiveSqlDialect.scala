@@ -2,6 +2,9 @@ package spark
 
 import org.apache.spark.sql.jdbc.{JdbcDialect, JdbcDialects}
 
+/**
+ * 避免内容与列名相同
+ */
 case object HiveSqlDialect extends JdbcDialect {
   override def canHandle(url: String): Boolean = url.startsWith("jdbc:hive2")
 

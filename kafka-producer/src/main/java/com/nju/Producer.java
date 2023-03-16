@@ -7,7 +7,12 @@ import java.io.*;
 import java.util.Properties;
 
 /**
- * @author hua
+ * 整体思路：
+ * 1. 将本次作业所需要的数据以json文件的形式存储于data文件夹
+ * 2. 对于data文件夹下的文件标识符进行遍历，将所有文件写入到kafka topic中
+ * 3. 通过配置linger.ms等数据保障其吞吐量，以及降低磁盘IO负担
+ * 4. 使用行计数器间隔性sleep当前线程，以控制生产流量
+ * 5. 行计数器兼做分区计数器，用于确保数据在分区的平均分配
  */
 public class Producer {
 

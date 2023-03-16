@@ -9,15 +9,6 @@ import org.apache.spark.sql.{Row, SaveMode, SparkSession}
 import java.util.Properties
 import scala.collection.mutable.ListBuffer
 /*
-  1.spark版本变更为2.3.3，部署模式local即可。也可探索其他模式。
-  2.由于远程调试出现的各种问题，且远程调试并非作业重点，这里重新建议使用spark-submit方式
-  3.本代码及spark命令均为最简单配置。如运行出现资源问题，请根据你的机器情况调整conf的配置以及spark-submit的参数，具体指分配CPU核数和分配内存。
-
-  调试：
-    当前代码中集成了spark-sql，可在开发机如windows运行调试;
-    需要在开发机本地下载hadoop，因为hadoop基于Linux编写，在开发机本地调试需要其中的一些文件，如模拟Linux目录系统的winutils.exe；
-    请修改System.setProperty("hadoop.home.dir", "your hadoop path in windows like E:\\hadoop-x.x.x")
-
   部署：
     注释掉System.setProperty("hadoop.home.dir", "your hadoop path in windows like E:\\hadoop-x.x.x")；
     修改pom.xml中<scope.mode>compile</scope.mode>为<scope.mode>provided</scope.mode>
@@ -28,12 +19,29 @@ import scala.collection.mutable.ListBuffer
     spark-submit Spark2DB-1.0.jar
  */
 
-
+/**
+ * 首先处理ETL小作业：pri_cust_contact_info表，工作如下:
+ * 1. 去掉列名前缀
+ * 2. 过滤无效行("contact != '⽆' and contact != '-' and contact != ''")
+ * 3. 去掉不需要显示的列("sys_source", "create_date", "update_date")
+ * 4. 丢弃含有null或者NAN的⾏
+ * 5. 对于联系⽅式去重uid
+ * 6. 添加新列（contact_phone, contact_address)
+ * 7. ReduceByKey合并相同uid的数据, con_type为TEL、OTH、MOB的，contact合并到contact_phone字段，用","分割 ,con_type为其他类型的，contact合并到contact_address字段，用","分割
+ *
+ * 然后处理剩下的九张表：
+ * 1. 去掉列名前缀
+ * 2. 删掉空值列
+ * 3. 过滤uid为空的数据
+ * 4. 去除重复行
+ * 5. 存入clickhouse
+ */
 object Hive2 {
-    // parameters
+    // 日志
     LoggerUtil.setSparkLogLevels()
 
     def main(args: Array[String]): Unit = {
+        //部署时注释掉
         System.setProperty("hadoop.home.dir", "C:\\hadoop")
         //以local模式部署spark
         val conf = new SparkConf()
