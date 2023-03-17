@@ -47,7 +47,7 @@ object Hive2 {
         //以local模式部署spark
         val conf = new SparkConf()
           .setAppName(this.getClass.getSimpleName)
-          .setMaster("local[*]")
+          .setMaster("spark://hcplantern-ubuntu:7077")
 
         //sparksession 读取数据入口
         val session = SparkSession.builder()
