@@ -47,7 +47,7 @@ object Hive2 {
         //以local模式部署spark
         val conf = new SparkConf()
           .setAppName(this.getClass.getSimpleName)
-          .setMaster("local[2]")
+          .setMaster("local[*]")
 
         //sparksession 读取数据入口
         val session = SparkSession.builder()
@@ -115,10 +115,10 @@ object Hive2 {
             "isolationLevel" -> "NONE",
             "numPartitions" -> "1")
         //url
-        val url = "jdbc:clickhouse://clickhouse:8123/dm"
+        val url = "jdbc:clickhouse://clickhouse:9001/dm"
         val dbtable = tblNameDst
         val pro = new Properties()
-        pro.put("driver", "ru.yandex.clickhouse.ClickHouseDriver")
+        pro.put("driver", "com.github.housepower.jdbc.ClickHouseDriver")
         df.write.mode(SaveMode.Append)
           .options(write_maps)
           .option("user", "default")
@@ -148,19 +148,15 @@ object Hive2 {
             }
 
             // 过滤uid为空的数据
-            println(tblNameDst)
             df = df.na.drop(Array("uid"))
             // 去除重复的⾏
             df = df.dropDuplicates()
 
-            val dbtable = tblNameDst
-            val pro = new Properties()
-            pro.put("driver", "ru.yandex.clickhouse.ClickHouseDriver")
             df.write.mode(SaveMode.Append)
               .options(write_maps)
               .option("user", "default")
               .option("password", "16d808ef")
-              .jdbc(url, dbtable, pro)
+              .jdbc(url, tblNameDst, pro)
         }
         session.close()
     }
