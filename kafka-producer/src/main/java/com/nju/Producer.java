@@ -4,6 +4,8 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Properties;
 
 /**
@@ -16,11 +18,26 @@ import java.util.Properties;
  */
 public class Producer {
 
-    public static void main(String[] args) {
+    /**
+     * The name of the system property that specifies the location of the configuration file.
+     */
+    private static final String CONF_FILE_PROPERTY_NAME = "producer.config";
+    Properties config;
+    KafkaProducer<String, String> producer;
+    File dataFile;
 
-        File dataPath = new File("src/main/resources/data");
-        File[] tempList = dataPath.listFiles();
+    public Producer() {
+        initProducer();
+        initDataPath();
+    }
 
+    private void initProducer() {
+        config = new Properties();
+        try {
+            config.load(Files.newBufferedReader(Paths.get(System.getProperty(CONF_FILE_PROPERTY_NAME))));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         Properties props = new Properties();
         //kafka 集群，broker-list
         props.put("bootstrap.servers", "kafka:9092");
@@ -35,31 +52,50 @@ public class Producer {
         props.put("buffer.memory", 33554432);
         props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        KafkaProducer<String, String> producer = new KafkaProducer<>(props);
-/*        try {
-        // 生产单条数据示例
-            ProducerRecord<String, String> record = new ProducerRecord<>("dm", "res");
-            producer.send(record);
-        } finally {
-            producer.close();
-        }*/
+        producer = new KafkaProducer<>(props);
+    }
 
+    private void initDataPath() {
+        config = new Properties();
+        try {
+            config.load(Files.newInputStream(Paths.get(System.getProperty(CONF_FILE_PROPERTY_NAME))));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String dataPath = config.getProperty("dataPath");
+        if (dataPath == null) {
+            throw new RuntimeException("dataPath must be set in producer.properties");
+        }
+        try {
+            dataFile = new File(dataPath);
+            if (!dataFile.exists()) {
+                dataFile.createNewFile();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void produce() {
+        long sleepCounterMax = Long.parseLong(config.getProperty("sleepCounterMax"));
+        long sleepTime = Long.parseLong(config.getProperty("sleepTime"));
+        String topic = config.getProperty("topic");
+        File[] fileList = dataFile.listFiles();
         int sleep_counter = 0;
-        assert tempList != null;
-        for (File f : tempList) {
+        assert fileList != null;
+        for (File file : fileList) {
             try {
-                FileInputStream fis = new FileInputStream(f);
-                BufferedReader br = new BufferedReader(new InputStreamReader(fis));
-                String readin = "";
+                BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+                String read_in = "";
                 while (true) {
                     try {
-                        if ((readin = br.readLine()) != null) {
-                            ProducerRecord<String, String> record = new ProducerRecord<>("hgs", 0, null, readin);
-                            System.out.println(readin);
+                        if ((read_in = reader.readLine()) != null) {
+                            ProducerRecord<String, String> record = new ProducerRecord<>(topic, 0, null, read_in);
+                            System.out.println(read_in);
                             producer.send(record);
-                            if (++sleep_counter == 1024) {
+                            if (++sleep_counter == sleepCounterMax) {
                                 sleep_counter = 0;
-                                Thread.sleep(50);
+                                Thread.sleep(sleepTime);
                             }
                         } else break;
                     } catch (Exception e) {
@@ -71,5 +107,18 @@ public class Producer {
             }
         }
         producer.close();
+    }
+
+    public static void main(String[] args) {
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals("-conf")) {
+                System.setProperty(CONF_FILE_PROPERTY_NAME, args[i + 1]);
+            }
+        }
+        if (System.getProperty(CONF_FILE_PROPERTY_NAME) == null) {
+            System.err.println("Please specify the configuration file path by -conf argument.");
+            System.exit(1);
+        }
+        new Producer().produce();
     }
 }
