@@ -11,7 +11,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <!--各个依赖库的版本 后续根据实际情况调整-->
-        <flink.version>1.14.4</flink.version>
+        <flink.version>1.13.5</flink.version>
         <scala-library.version>2.11.8</scala-library.version>
         <fastjson.version>2.0.25</fastjson.version>
         <kafka_2.13.version>3.1.0</kafka_2.13.version>
@@ -21,7 +21,7 @@
         <slf4j-simple.version>2.0.6</slf4j-simple.version>
         <commons-lang3.version>3.12.0</commons-lang3.version>
         <hutool-all.version>5.8.11</hutool-all.version>
-        <scope.mode>provided</scope.mode>
+        <scope.mode>compile</scope.mode>
     </properties>
 
     <dependencies>

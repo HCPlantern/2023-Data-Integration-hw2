@@ -9,8 +9,8 @@ public class Constant {
 
     private static Constant instance = new Constant();
 
-    public String url;
-    public String topic;
+    public String url = "jdbc:clickhouse://clickhouse:8123/stream_test";
+    public String topic = "test";
 
     public Properties properties;
 
@@ -28,7 +28,5 @@ public class Constant {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        this.topic = properties.getProperty("topic");
-        this.url = properties.getProperty("database.schema");
     }
 }
