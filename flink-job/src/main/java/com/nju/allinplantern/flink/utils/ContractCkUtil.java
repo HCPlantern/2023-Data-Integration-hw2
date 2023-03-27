@@ -14,8 +14,6 @@ import java.util.Map;
 
 
 public class ContractCkUtil extends RichSinkFunction<Contract> {
-    private static final String url = "jdbc:clickhouse://clickhouse:8123/dm";
-
     // ck 连接
     private ClickHouseConnection connection;
 
@@ -23,6 +21,7 @@ public class ContractCkUtil extends RichSinkFunction<Contract> {
 
     // 对应的 sql
     private static final String sql = "INSERT INTO dm_v_tr_contract_mx(uid,contract_no,apply_no,artificial_no,occur_date,loan_cust_no,cust_name,buss_type,occur_type,is_credit_cyc,curr_type,buss_amt,loan_pert,term_year,term_mth,term_day,base_rate_type,base_rate,float_type,rate_float,rate,pay_times,pay_type,direction,loan_use,pay_source,putout_date,matu_date,vouch_type,apply_type,extend_times,actu_out_amt,bal,norm_bal,dlay_bal,dull_bal,owed_int_in,owed_int_out,fine_pr_int,fine_intr_int,dlay_days,five_class,class_date,mge_org,mgr_no,operate_org,operator,operate_date,reg_org,register,reg_date,inte_settle_type,is_bad,frz_amt,con_crl_type,shift_type,due_intr_days,reson_type,shift_bal,is_vc_vouch,loan_use_add,finsh_type,finsh_date,sts_flag,src_dt,etl_dt) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
 
     @Override
     public void open(Configuration parameters) throws Exception {
@@ -45,7 +44,7 @@ public class ContractCkUtil extends RichSinkFunction<Contract> {
         properties.setPassword("16d808ef");
         properties.setSessionId("default-session-id");
 
-        ClickHouseDataSource dataSource = new ClickHouseDataSource(url, properties);
+        ClickHouseDataSource dataSource = new ClickHouseDataSource(Constant.url, properties);
         Map<ClickHouseQueryParam, String> additionalDBParams = new HashMap<>();
         additionalDBParams.put(ClickHouseQueryParam.SESSION_ID, "new-session-id");
         try {

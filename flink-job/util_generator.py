@@ -42,7 +42,7 @@ public class {_Po_class_name}CkUtil extends RichSinkFunction<{_Po_class_name}> {
     @Override
     public void invoke({_Po_class_name} value, Context context) throws Exception {{
         // 具体的sink处理
-        String url = \"jdbc:clickhouse://172.17.188.153:8123\";
+        String url = \"jdbc:clickhouse://clickhouse:8123/dm\";
         ClickHouseProperties properties = new ClickHouseProperties();
         properties.setUser(\"default\");
         properties.setPassword(\"16d808ef\");

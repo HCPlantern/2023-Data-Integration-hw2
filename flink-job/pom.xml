@@ -12,6 +12,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <!--各个依赖库的版本 后续根据实际情况调整-->
         <flink-java.version>1.11.1</flink-java.version>
+        <scala-library.version>2.11.8</scala-library.version>
         <flink-clients_2.11.version>1.11.1</flink-clients_2.11.version>
         <flink-connector-kafka_2.11.version>1.11.1</flink-connector-kafka_2.11.version>
         <flink-table-api-java-bridge_2.11.version>1.11.1</flink-table-api-java-bridge_2.11.version>
@@ -32,13 +33,12 @@
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
-            <version>2.11.8</version>
+            <version>${scala-library.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-java</artifactId>
             <version>${flink-java.version}</version>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
