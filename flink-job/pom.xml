@@ -11,13 +11,8 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <!--各个依赖库的版本 后续根据实际情况调整-->
-        <flink-java.version>1.11.1</flink-java.version>
+        <flink.version>1.14.4</flink.version>
         <scala-library.version>2.11.8</scala-library.version>
-        <flink-clients_2.11.version>1.11.1</flink-clients_2.11.version>
-        <flink-connector-kafka_2.11.version>1.11.1</flink-connector-kafka_2.11.version>
-        <flink-table-api-java-bridge_2.11.version>1.11.1</flink-table-api-java-bridge_2.11.version>
-        <flink-streaming-java_2.11.version>1.11.1</flink-streaming-java_2.11.version>
-        <flink-connector-jdbc_2.11.version>1.11.1</flink-connector-jdbc_2.11.version>
         <fastjson.version>2.0.25</fastjson.version>
         <kafka_2.13.version>3.1.0</kafka_2.13.version>
         <kafka-clients.version>3.4.0</kafka-clients.version>
@@ -26,6 +21,7 @@
         <slf4j-simple.version>2.0.6</slf4j-simple.version>
         <commons-lang3.version>3.12.0</commons-lang3.version>
         <hutool-all.version>5.8.11</hutool-all.version>
+        <scope.mode>provided</scope.mode>
     </properties>
 
     <dependencies>
@@ -37,37 +33,52 @@
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
+            <artifactId>flink-core</artifactId>
+            <version>${flink.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
             <artifactId>flink-java</artifactId>
-            <version>${flink-java.version}</version>
+            <version>${flink.version}</version>
+            <scope>${scope.mode}</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-clients_2.11</artifactId>
-            <version>${flink-clients_2.11.version}</version>
+            <version>${flink.version}</version>
+            <scope>${scope.mode}</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-kafka_2.11</artifactId>
-            <version>${flink-connector-kafka_2.11.version}</version>
+            <version>${flink.version}</version>
+            <scope>${scope.mode}</scope>
+
         </dependency>
 
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-table-api-java-bridge_2.11</artifactId>
-            <version>${flink-table-api-java-bridge_2.11.version}</version>
+            <version>${flink.version}</version>
+            <scope>${scope.mode}</scope>
+
         </dependency>
 
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-streaming-java_2.11</artifactId>
-            <version>1.11.1</version>
+            <version>${flink.version}</version>
+            <scope>${scope.mode}</scope>
+
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-jdbc_2.11</artifactId>
-            <version>${flink-connector-jdbc_2.11.version}</version>
+            <version>${flink.version}</version>
+            <scope>${scope.mode}</scope>
+
         </dependency>
 
 
@@ -125,21 +136,15 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.22</version>
-            <scope>compile</scope>
         </dependency>
-
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
             <version>4.4</version>
         </dependency>
-
-
-
     </dependencies>
     <build>
         <plugins>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
@@ -164,7 +169,6 @@
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
     </build>
 </project>
