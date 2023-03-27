@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
  */
 public class FlinkSinkClickHouse {
 
+
     /**
      * 表驱动
      */
