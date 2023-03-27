@@ -14,7 +14,6 @@ import java.util.Map;
 
 
 public class SaCkUtil extends RichSinkFunction<Sa> {
-    private static final String url = "jdbc:clickhouse://clickhouse:8123/dm";
 
     // ck 连接
     private ClickHouseConnection connection;
@@ -45,7 +44,7 @@ public class SaCkUtil extends RichSinkFunction<Sa> {
         properties.setPassword("16d808ef");
         properties.setSessionId("default-session-id");
 
-        ClickHouseDataSource dataSource = new ClickHouseDataSource(url, properties);
+        ClickHouseDataSource dataSource = new ClickHouseDataSource(Constant.url, properties);
         Map<ClickHouseQueryParam, String> additionalDBParams = new HashMap<>();
         additionalDBParams.put(ClickHouseQueryParam.SESSION_ID, "new-session-id");
         try {

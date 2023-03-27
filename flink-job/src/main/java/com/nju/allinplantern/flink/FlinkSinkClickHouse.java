@@ -32,10 +32,6 @@ import java.util.stream.Collectors;
  * 4. 处理后的数据 sink 到 ClickHouse
  */
 public class FlinkSinkClickHouse {
-    /**
-     * 消费的主题
-     */
-    private static final String topic = "transaction";
 
     /**
      * 表驱动
@@ -73,23 +69,6 @@ public class FlinkSinkClickHouse {
             MapUtil.entry(Sjyh.class, new SjyhCkUtil())
     );
     private static final String[] eventTypes = {"contract", "djk", "dsf", "duebill", "etc", "grwy", "gzdf", "huanb", "huanx", "sa", "sbyb", "sdrq", "shop", "sjyh"};
-
-    /**
-     * 设置 kafka consumer 对应的属性
-     *
-     * @param propsFile 配置文件属性
-     * @return 配置对象
-     */
-    public Properties setProps(String propsFile) {
-        Properties props = new Properties();
-        try {
-            InputStream in = ClassLoader.getSystemResourceAsStream(propsFile);
-            props.load(in);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return props;
-    }
 
     /**
      * 分割数据流 并行处理
@@ -136,11 +115,9 @@ public class FlinkSinkClickHouse {
         FlinkSinkClickHouse flinkSinkClickHouse = new FlinkSinkClickHouse();
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
-        // 设置 props
-        Properties props = flinkSinkClickHouse.setProps("flink-kafka-consumer.properties");
 
         // 定义 flink kafka consumer
-        FlinkKafkaConsumer<String> consumer = new FlinkKafkaConsumer<>(topic, new SimpleStringSchema(), props);
+        FlinkKafkaConsumer<String> consumer = new FlinkKafkaConsumer<>(Constant.topic, new SimpleStringSchema(), PropertyFactory.getProperties());
         consumer.setStartFromGroupOffsets();
         consumer.setStartFromEarliest();
 
