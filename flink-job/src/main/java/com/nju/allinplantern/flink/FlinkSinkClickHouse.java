@@ -17,11 +17,12 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
  * 4. 处理后的数据 sink 到 ClickHouse
  */
 public class FlinkSinkClickHouse {
+
 
     /**
      * 表驱动
@@ -115,9 +117,17 @@ public class FlinkSinkClickHouse {
         FlinkSinkClickHouse flinkSinkClickHouse = new FlinkSinkClickHouse();
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
-
+        Constant constant = Constant.getInstance();
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals("-conf")) {
+                constant.initialize(args[i + 1]);
+            } else {
+                System.err.println("Please specify the configuration file path by -conf argument.");
+                System.exit(-1);
+            }
+        }
         // 定义 flink kafka consumer
-        FlinkKafkaConsumer<String> consumer = new FlinkKafkaConsumer<>(Constant.topic, new SimpleStringSchema(), PropertyFactory.getProperties());
+        FlinkKafkaConsumer<String> consumer = new FlinkKafkaConsumer<>(constant.topic, new SimpleStringSchema(), constant.properties);
         consumer.setStartFromGroupOffsets();
         consumer.setStartFromEarliest();
 

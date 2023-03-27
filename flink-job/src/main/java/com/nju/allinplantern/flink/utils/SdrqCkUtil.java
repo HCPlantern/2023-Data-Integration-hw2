@@ -44,7 +44,7 @@ public class SdrqCkUtil extends RichSinkFunction<Sdrq> {
         properties.setPassword("16d808ef");
         properties.setSessionId("default-session-id");
 
-        ClickHouseDataSource dataSource = new ClickHouseDataSource(Constant.url, properties);
+        ClickHouseDataSource dataSource = new ClickHouseDataSource(Constant.getInstance().url, properties);
         Map<ClickHouseQueryParam, String> additionalDBParams = new HashMap<>();
         additionalDBParams.put(ClickHouseQueryParam.SESSION_ID, "new-session-id");
         try {
