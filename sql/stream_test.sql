@@ -1,7 +1,7 @@
-DROP DATABASE if exists stream;
-CREATE DATABASE stream;
+DROP DATABASE if exists stream_test;
+CREATE DATABASE stream_test;
 
-CREATE TABLE stream.dm_v_tr_contract_mx (
+CREATE TABLE stream_test.dm_v_tr_contract_mx (
     uid String,
     contract_no String,
     apply_no String,
@@ -72,7 +72,7 @@ CREATE TABLE stream.dm_v_tr_contract_mx (
 ENGINE = MergeTree
 ORDER BY uid;
 
-CREATE TABLE stream.dm_v_tr_djk_mx (
+CREATE TABLE stream_test.dm_v_tr_djk_mx (
     uid String,
     card_no String,
     tran_type String,
@@ -93,7 +93,7 @@ CREATE TABLE stream.dm_v_tr_djk_mx (
 ENGINE = MergeTree
 ORDER BY uid;
 
-CREATE TABLE stream.dm_v_tr_dsf_mx (
+CREATE TABLE stream_test.dm_v_tr_dsf_mx (
     tran_date String,
     tran_log_no String,
     tran_code String,
@@ -118,7 +118,7 @@ CREATE TABLE stream.dm_v_tr_dsf_mx (
 ENGINE = MergeTree
 ORDER BY tran_date;
 
-CREATE TABLE stream.dm_v_tr_duebill_mx (
+CREATE TABLE stream_test.dm_v_tr_duebill_mx (
     uid String,
     acct_no String,
     receipt_no String,
@@ -173,7 +173,7 @@ CREATE TABLE stream.dm_v_tr_duebill_mx (
 ENGINE = MergeTree
 ORDER BY uid;
 
-CREATE TABLE stream.dm_v_tr_etc_mx (
+CREATE TABLE stream_test.dm_v_tr_etc_mx (
     uid String,
     etc_acct String,
     card_no String,
@@ -191,7 +191,7 @@ CREATE TABLE stream.dm_v_tr_etc_mx (
 ENGINE = MergeTree
 ORDER BY uid;
 
-CREATE TABLE stream.dm_v_tr_grwy_mx (
+CREATE TABLE stream_test.dm_v_tr_grwy_mx (
     uid String,
     mch_channel String,
     login_type String,
@@ -213,7 +213,7 @@ CREATE TABLE stream.dm_v_tr_grwy_mx (
 ENGINE = MergeTree
 ORDER BY uid;
 
-CREATE TABLE stream.dm_v_tr_gzdf_mx (
+CREATE TABLE stream_test.dm_v_tr_gzdf_mx (
     belong_org String,
     ent_acct String,
     ent_name String,
@@ -232,7 +232,7 @@ CREATE TABLE stream.dm_v_tr_gzdf_mx (
 ENGINE = MergeTree
 ORDER BY belong_org;
 
-CREATE TABLE stream.dm_v_tr_huanb_mx (
+CREATE TABLE stream_test.dm_v_tr_huanb_mx (
     tran_flag String,
     uid String,
     cust_name String,
@@ -256,7 +256,7 @@ CREATE TABLE stream.dm_v_tr_huanb_mx (
 ENGINE = MergeTree
 ORDER BY tran_flag;
 
-CREATE TABLE stream.dm_v_tr_huanx_mx (
+CREATE TABLE stream_test.dm_v_tr_huanx_mx (
     tran_flag String,
     uid String,
     cust_name String,
@@ -280,7 +280,7 @@ CREATE TABLE stream.dm_v_tr_huanx_mx (
 ENGINE = MergeTree
 ORDER BY tran_flag;
 
-CREATE TABLE stream.dm_v_tr_sa_mx (
+CREATE TABLE stream_test.dm_v_tr_sa_mx (
     uid String,
     card_no String,
     cust_name String,
@@ -317,7 +317,7 @@ ENGINE = MergeTree
 ORDER BY uid
 PARTITION BY tran_date;
 
-CREATE TABLE stream.dm_v_tr_sbyb_mx (
+CREATE TABLE stream_test.dm_v_tr_sbyb_mx (
     uid String,
     cust_name String,
     tran_date String,
@@ -332,7 +332,7 @@ CREATE TABLE stream.dm_v_tr_sbyb_mx (
 ENGINE = MergeTree
 ORDER BY uid;
 
-CREATE TABLE stream.dm_v_tr_sdrq_mx (
+CREATE TABLE stream_test.dm_v_tr_sdrq_mx (
     hosehld_no String,
     acct_no String,
     cust_name String,
@@ -352,7 +352,7 @@ CREATE TABLE stream.dm_v_tr_sdrq_mx (
 ENGINE = MergeTree
 ORDER BY hosehld_no;
 
-CREATE TABLE stream.v_tr_shop_mx (
+CREATE TABLE stream_test.v_tr_shop_mx (
     tran_channel String,
     order_code String,
     shop_code String,
@@ -371,7 +371,7 @@ CREATE TABLE stream.v_tr_shop_mx (
 ENGINE = MergeTree
 ORDER BY tran_channel;
 
-CREATE TABLE stream.dm_v_tr_sjyh_mx (
+CREATE TABLE stream_test.dm_v_tr_sjyh_mx (
     uid String,
     mch_channel String,
     login_type String,
