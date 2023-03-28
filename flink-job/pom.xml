@@ -21,7 +21,7 @@
         <slf4j-simple.version>2.0.6</slf4j-simple.version>
         <commons-lang3.version>3.12.0</commons-lang3.version>
         <hutool-all.version>5.8.11</hutool-all.version>
-        <scope.mode>compile</scope.mode>
+        <scope.mode>provided</scope.mode>
     </properties>
 
     <dependencies>
@@ -31,11 +31,18 @@
             <artifactId>scala-library</artifactId>
             <version>${scala-library.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-core</artifactId>
             <version>${flink.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-connector-kafka_2.11</artifactId>
+            <version>${flink.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-java</artifactId>
@@ -52,18 +59,9 @@
 
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-kafka_2.11</artifactId>
-            <version>${flink.version}</version>
-            <scope>${scope.mode}</scope>
-
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.flink</groupId>
             <artifactId>flink-table-api-java-bridge_2.11</artifactId>
             <version>${flink.version}</version>
             <scope>${scope.mode}</scope>
-
         </dependency>
 
         <dependency>
@@ -71,14 +69,12 @@
             <artifactId>flink-streaming-java_2.11</artifactId>
             <version>${flink.version}</version>
             <scope>${scope.mode}</scope>
-
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-jdbc_2.11</artifactId>
             <version>${flink.version}</version>
             <scope>${scope.mode}</scope>
-
         </dependency>
 
 
