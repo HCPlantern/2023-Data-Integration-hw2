@@ -14,7 +14,6 @@ import java.util.Map;
 
 
 public class GzdfCkUtil extends RichSinkFunction<Gzdf> {
-
     // ck 连接
     private ClickHouseConnection connection;
 
@@ -22,6 +21,9 @@ public class GzdfCkUtil extends RichSinkFunction<Gzdf> {
 
     // 对应的 sql
     private static final String sql = "INSERT INTO dm_v_tr_gzdf_mx(belong_org,ent_acct,ent_name,eng_cert_no,acct_no,cust_name,uid,tran_date,tran_amt,tran_log_no,is_secu_card,trna_channel,batch_no,etl_dt) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+    // 数据条目计数器
+    private static int count = 0;
 
     @Override
     public void open(Configuration parameters) throws Exception {
@@ -70,7 +72,20 @@ public class GzdfCkUtil extends RichSinkFunction<Gzdf> {
             preparedStatement.setString(13, value.getBatch_no());
             preparedStatement.setString(14, value.getEtl_dt());
 
-            preparedStatement.execute();
+
+            preparedStatement.addBatch();
+
+            ++count;
+            int[] successLines;
+            if (count % Constant.INSERT_BATCH_SIZE == 0) { //可能会丢最后几条(小于INSERT_BATCH_SIZE条)
+                successLines = preparedStatement.executeBatch();
+                //提交，批量插入数据库中
+                connection.commit();
+                preparedStatement.clearBatch();
+                if (count % Constant.INSERT_LOG_SIZE == 0)
+                    System.out.println("dm.dm_v_tr_gzdf_mx：第" + count + "条数据，" + "成功了插入了" +
+                            successLines.length + "行数据");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

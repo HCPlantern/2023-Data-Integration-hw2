@@ -14,7 +14,6 @@ import java.util.Map;
 
 
 public class HuanxCkUtil extends RichSinkFunction<Huanx> {
-
     // ck 连接
     private ClickHouseConnection connection;
 
@@ -22,6 +21,9 @@ public class HuanxCkUtil extends RichSinkFunction<Huanx> {
 
     // 对应的 sql
     private static final String sql = "INSERT INTO dm_v_tr_huanx_mx(tran_flag,uid,cust_name,acct_no,tran_date,tran_time,tran_amt,cac_intc_pr,tran_code,dr_cr_code,pay_term,tran_teller_no,intc_strt_date,intc_end_date,intr,tran_log_no,tran_type,dscrp_code,etl_dt) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+    // 数据条目计数器
+    private static int count = 0;
 
     @Override
     public void open(Configuration parameters) throws Exception {
@@ -75,7 +77,20 @@ public class HuanxCkUtil extends RichSinkFunction<Huanx> {
             preparedStatement.setString(18, value.getDscrp_code());
             preparedStatement.setString(19, value.getEtl_dt());
 
-            preparedStatement.execute();
+
+            preparedStatement.addBatch();
+
+            ++count;
+            int[] successLines;
+            if (count % Constant.INSERT_BATCH_SIZE == 0) { //可能会丢最后几条(小于INSERT_BATCH_SIZE条)
+                successLines = preparedStatement.executeBatch();
+                //提交，批量插入数据库中
+                connection.commit();
+                preparedStatement.clearBatch();
+                if (count % Constant.INSERT_LOG_SIZE == 0)
+                    System.out.println("dm.dm_v_tr_huanx_mx：第" + count + "条数据，" + "成功了插入了" +
+                            successLines.length + "行数据");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

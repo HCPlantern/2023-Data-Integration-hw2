@@ -14,7 +14,6 @@ import java.util.Map;
 
 
 public class DuebillCkUtil extends RichSinkFunction<Duebill> {
-
     // ck 连接
     private ClickHouseConnection connection;
 
@@ -22,6 +21,9 @@ public class DuebillCkUtil extends RichSinkFunction<Duebill> {
 
     // 对应的 sql
     private static final String sql = "INSERT INTO dm_v_tr_duebill_mx(uid,acct_no,receipt_no,contract_no,subject_no,cust_no,loan_cust_no,cust_name,buss_type,curr_type,buss_amt,putout_date,matu_date,actu_matu_date,buss_rate,actu_buss_rate,intr_type,intr_cyc,pay_times,pay_cyc,extend_times,bal,norm_bal,dlay_amt,dull_amt,bad_debt_amt,owed_int_in,owed_int_out,fine_pr_int,fine_intr_int,dlay_days,pay_acct,putout_acct,pay_back_acct,due_intr_days,operate_org,operator,reg_org,register,occur_date,loan_use,pay_type,pay_freq,vouch_type,mgr_no,mge_org,loan_channel,ten_class,src_dt,etl_dt) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+    // 数据条目计数器
+    private static int count = 0;
 
     @Override
     public void open(Configuration parameters) throws Exception {
@@ -106,7 +108,20 @@ public class DuebillCkUtil extends RichSinkFunction<Duebill> {
             preparedStatement.setString(49, value.getSrc_dt());
             preparedStatement.setString(50, value.getEtl_dt());
 
-            preparedStatement.execute();
+
+            preparedStatement.addBatch();
+
+            ++count;
+            int[] successLines;
+            if (count % Constant.INSERT_BATCH_SIZE == 0) { //可能会丢最后几条(小于INSERT_BATCH_SIZE条)
+                successLines = preparedStatement.executeBatch();
+                //提交，批量插入数据库中
+                connection.commit();
+                preparedStatement.clearBatch();
+                if (count % Constant.INSERT_LOG_SIZE == 0)
+                    System.out.println("dm.dm_v_tr_duebill_mx：第" + count + "条数据，" + "成功了插入了" +
+                            successLines.length + "行数据");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

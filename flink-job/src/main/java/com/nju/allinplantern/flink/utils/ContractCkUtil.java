@@ -22,6 +22,8 @@ public class ContractCkUtil extends RichSinkFunction<Contract> {
     // 对应的 sql
     private static final String sql = "INSERT INTO dm_v_tr_contract_mx(uid,contract_no,apply_no,artificial_no,occur_date,loan_cust_no,cust_name,buss_type,occur_type,is_credit_cyc,curr_type,buss_amt,loan_pert,term_year,term_mth,term_day,base_rate_type,base_rate,float_type,rate_float,rate,pay_times,pay_type,direction,loan_use,pay_source,putout_date,matu_date,vouch_type,apply_type,extend_times,actu_out_amt,bal,norm_bal,dlay_bal,dull_bal,owed_int_in,owed_int_out,fine_pr_int,fine_intr_int,dlay_days,five_class,class_date,mge_org,mgr_no,operate_org,operator,operate_date,reg_org,register,reg_date,inte_settle_type,is_bad,frz_amt,con_crl_type,shift_type,due_intr_days,reson_type,shift_bal,is_vc_vouch,loan_use_add,finsh_type,finsh_date,sts_flag,src_dt,etl_dt) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
+    // 数据条目计数器
+    private static int count = 0;
 
     @Override
     public void open(Configuration parameters) throws Exception {
@@ -122,7 +124,20 @@ public class ContractCkUtil extends RichSinkFunction<Contract> {
             preparedStatement.setString(65, value.getSrc_dt());
             preparedStatement.setString(66, value.getEtl_dt());
 
-            preparedStatement.execute();
+
+            preparedStatement.addBatch();
+
+            ++count;
+            int[] successLines;
+            if (count % Constant.INSERT_BATCH_SIZE == 0) { //可能会丢最后几条(小于INSERT_BATCH_SIZE条)
+                successLines = preparedStatement.executeBatch();
+                //提交，批量插入数据库中
+                connection.commit();
+                preparedStatement.clearBatch();
+                if (count % Constant.INSERT_LOG_SIZE == 0)
+                    System.out.println("dm.dm_v_tr_contract_mx：第" + count + "条数据，" + "成功了插入了" +
+                            successLines.length + "行数据");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

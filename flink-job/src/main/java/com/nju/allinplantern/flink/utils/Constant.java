@@ -10,9 +10,20 @@ public class Constant {
     private static Constant instance = new Constant();
 
     public String url = "jdbc:clickhouse://clickhouse:8123/stream_test";
+
     public String topic = "test";
 
     public Properties properties;
+
+    /**
+     * 批量插入数
+     */
+    public static final int INSERT_BATCH_SIZE = 500;
+
+    /**
+     * 日志输出步长
+     */
+    public static final int INSERT_LOG_SIZE = 10000;
 
     private Constant() {
     }

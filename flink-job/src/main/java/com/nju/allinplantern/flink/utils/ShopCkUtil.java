@@ -14,7 +14,6 @@ import java.util.Map;
 
 
 public class ShopCkUtil extends RichSinkFunction<Shop> {
-
     // ck 连接
     private ClickHouseConnection connection;
 
@@ -22,6 +21,9 @@ public class ShopCkUtil extends RichSinkFunction<Shop> {
 
     // 对应的 sql
     private static final String sql = "INSERT INTO dm_v_tr_shop_mx(tran_channel,order_code,shop_code,shop_name,hlw_tran_type,tran_date,tran_time,tran_amt,current_status,score_num,pay_channel,uid,legal_name,etl_dt) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+    // 数据条目计数器
+    private static int count = 0;
 
     @Override
     public void open(Configuration parameters) throws Exception {
@@ -70,7 +72,20 @@ public class ShopCkUtil extends RichSinkFunction<Shop> {
             preparedStatement.setString(13, value.getLegal_name());
             preparedStatement.setString(14, value.getEtl_dt());
 
-            preparedStatement.execute();
+
+            preparedStatement.addBatch();
+
+            ++count;
+            int[] successLines;
+            if (count % Constant.INSERT_BATCH_SIZE == 0) { //可能会丢最后几条(小于INSERT_BATCH_SIZE条)
+                successLines = preparedStatement.executeBatch();
+                //提交，批量插入数据库中
+                connection.commit();
+                preparedStatement.clearBatch();
+                if (count % Constant.INSERT_LOG_SIZE == 0)
+                    System.out.println("dm.dm_v_tr_shop_mx：第" + count + "条数据，" + "成功了插入了" +
+                            successLines.length + "行数据");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

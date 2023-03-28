@@ -14,7 +14,6 @@ import java.util.Map;
 
 
 public class EtcCkUtil extends RichSinkFunction<Etc> {
-
     // ck 连接
     private ClickHouseConnection connection;
 
@@ -22,6 +21,9 @@ public class EtcCkUtil extends RichSinkFunction<Etc> {
 
     // 对应的 sql
     private static final String sql = "INSERT INTO dm_v_tr_etc_mx(uid,etc_acct,card_no,car_no,cust_name,tran_date,tran_time,tran_amt_fen,real_amt,conces_amt,tran_place,mob_phone,etl_dt) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+    // 数据条目计数器
+    private static int count = 0;
 
     @Override
     public void open(Configuration parameters) throws Exception {
@@ -69,7 +71,20 @@ public class EtcCkUtil extends RichSinkFunction<Etc> {
             preparedStatement.setString(12, value.getMob_phone());
             preparedStatement.setString(13, value.getEtl_dt());
 
-            preparedStatement.execute();
+
+            preparedStatement.addBatch();
+
+            ++count;
+            int[] successLines;
+            if (count % Constant.INSERT_BATCH_SIZE == 0) { //可能会丢最后几条(小于INSERT_BATCH_SIZE条)
+                successLines = preparedStatement.executeBatch();
+                //提交，批量插入数据库中
+                connection.commit();
+                preparedStatement.clearBatch();
+                if (count % Constant.INSERT_LOG_SIZE == 0)
+                    System.out.println("dm.dm_v_tr_etc_mx：第" + count + "条数据，" + "成功了插入了" +
+                            successLines.length + "行数据");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

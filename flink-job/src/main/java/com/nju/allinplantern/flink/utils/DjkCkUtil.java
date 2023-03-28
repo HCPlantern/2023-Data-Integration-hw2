@@ -22,6 +22,9 @@ public class DjkCkUtil extends RichSinkFunction<Djk> {
     // 对应的 sql
     private static final String sql = "INSERT INTO dm_v_tr_djk_mx(uid,card_no,tran_type,tran_type_desc,tran_amt,tran_amt_sign,mer_type,mer_code,rev_ind,tran_desc,tran_date,val_date,pur_date,tran_time,acct_no,etl_dt) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
+    // 数据条目计数器
+    private static int count = 0;
+
     @Override
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
@@ -71,7 +74,20 @@ public class DjkCkUtil extends RichSinkFunction<Djk> {
             preparedStatement.setString(15, value.getAcct_no());
             preparedStatement.setString(16, value.getEtl_dt());
 
-            preparedStatement.execute();
+
+            preparedStatement.addBatch();
+
+            ++count;
+            int[] successLines;
+            if (count % Constant.INSERT_BATCH_SIZE == 0) { //可能会丢最后几条(小于INSERT_BATCH_SIZE条)
+                successLines = preparedStatement.executeBatch();
+                //提交，批量插入数据库中
+                connection.commit();
+                preparedStatement.clearBatch();
+                if (count % Constant.INSERT_LOG_SIZE == 0)
+                    System.out.println("dm.dm_v_tr_djk_mx：第" + count + "条数据，" + "成功了插入了" +
+                            successLines.length + "行数据");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

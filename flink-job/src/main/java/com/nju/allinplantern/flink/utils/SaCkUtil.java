@@ -14,7 +14,6 @@ import java.util.Map;
 
 
 public class SaCkUtil extends RichSinkFunction<Sa> {
-
     // ck 连接
     private ClickHouseConnection connection;
 
@@ -22,6 +21,9 @@ public class SaCkUtil extends RichSinkFunction<Sa> {
 
     // 对应的 sql
     private static final String sql = "INSERT INTO dm_v_tr_sa_mx(uid,card_no,cust_name,acct_no,det_n,curr_type,tran_teller_no,cr_amt,bal,tran_amt,tran_card_no,tran_type,tran_log_no,dr_amt,open_org,dscrp_code,remark,tran_time,tran_date,sys_date,tran_code,remark_1,oppo_cust_name,agt_cert_type,agt_cert_no,agt_cust_name,channel_flag,oppo_acct_no,oppo_bank_no,src_dt,etl_dt) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+    // 数据条目计数器
+    private static int count = 0;
 
     @Override
     public void open(Configuration parameters) throws Exception {
@@ -87,7 +89,20 @@ public class SaCkUtil extends RichSinkFunction<Sa> {
             preparedStatement.setString(30, value.getSrc_dt());
             preparedStatement.setString(31, value.getEtl_dt());
 
-            preparedStatement.execute();
+
+            preparedStatement.addBatch();
+
+            ++count;
+            int[] successLines;
+            if (count % Constant.INSERT_BATCH_SIZE == 0) { //可能会丢最后几条(小于INSERT_BATCH_SIZE条)
+                successLines = preparedStatement.executeBatch();
+                //提交，批量插入数据库中
+                connection.commit();
+                preparedStatement.clearBatch();
+                if (count % Constant.INSERT_LOG_SIZE == 0)
+                    System.out.println("dm.dm_v_tr_sa_mx：第" + count + "条数据，" + "成功了插入了" +
+                            successLines.length + "行数据");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

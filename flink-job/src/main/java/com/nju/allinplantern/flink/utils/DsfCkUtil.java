@@ -14,7 +14,6 @@ import java.util.Map;
 
 
 public class DsfCkUtil extends RichSinkFunction<Dsf> {
-
     // ck 连接
     private ClickHouseConnection connection;
 
@@ -22,6 +21,9 @@ public class DsfCkUtil extends RichSinkFunction<Dsf> {
 
     // 对应的 sql
     private static final String sql = "INSERT INTO dm_v_tr_dsf_mx(tran_date,tran_log_no,tran_code,channel_flg,tran_org,tran_teller_no,dc_flag,tran_amt,send_bank,payer_open_bank,payer_acct_no,payer_name,payee_open_bank,payee_acct_no,payee_name,tran_sts,busi_type,busi_sub_type,etl_dt,uid) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+    // 数据条目计数器
+    private static int count = 0;
 
     @Override
     public void open(Configuration parameters) throws Exception {
@@ -76,7 +78,20 @@ public class DsfCkUtil extends RichSinkFunction<Dsf> {
             preparedStatement.setString(19, value.getEtl_dt());
             preparedStatement.setString(20, value.getUid());
 
-            preparedStatement.execute();
+
+            preparedStatement.addBatch();
+
+            ++count;
+            int[] successLines;
+            if (count % Constant.INSERT_BATCH_SIZE == 0) { //可能会丢最后几条(小于INSERT_BATCH_SIZE条)
+                successLines = preparedStatement.executeBatch();
+                //提交，批量插入数据库中
+                connection.commit();
+                preparedStatement.clearBatch();
+                if (count % Constant.INSERT_LOG_SIZE == 0)
+                    System.out.println("dm.dm_v_tr_dsf_mx：第" + count + "条数据，" + "成功了插入了" +
+                            successLines.length + "行数据");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
