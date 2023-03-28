@@ -91,7 +91,7 @@ public class Producer {
                 while (true) {
                     try {
                         if ((read_in = reader.readLine()) != null) {
-                            ProducerRecord<String, String> record = new ProducerRecord<>(topic, 0, null, read_in);
+                            ProducerRecord<String, String> record = new ProducerRecord<>(topic,null, read_in);
                             producer.send(record);
                             if (produceCount % 10000 == 0) {
                                 System.out.println("信息数量：" + produceCount + "，当前时间是：" + System.currentTimeMillis());
