@@ -14,7 +14,6 @@ import java.util.Map;
 
 
 public class SjyhCkUtil extends RichSinkFunction<Sjyh> {
-
     // ck 连接
     private ClickHouseConnection connection;
 
@@ -22,6 +21,9 @@ public class SjyhCkUtil extends RichSinkFunction<Sjyh> {
 
     // 对应的 sql
     private static final String sql = "INSERT INTO dm_v_tr_sjyh_mx(uid,mch_channel,login_type,ebank_cust_no,tran_date,tran_time,tran_code,tran_sts,return_code,return_msg,sys_type,payer_acct_no,payer_acct_name,payee_acct_no,payee_acct_name,tran_amt,etl_dt) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+    // 数据条目计数器
+    private static int count = 0;
 
     @Override
     public void open(Configuration parameters) throws Exception {
@@ -52,8 +54,6 @@ public class SjyhCkUtil extends RichSinkFunction<Sjyh> {
                 connection = dataSource.getConnection();
                 connection.setAutoCommit(false);
                 preparedStatement = connection.prepareStatement(sql);
-            } else {
-                System.out.println("无需重新建立连接");
             }
             preparedStatement.setString(1, value.getUid());
             preparedStatement.setString(2, value.getMch_channel());
@@ -73,7 +73,19 @@ public class SjyhCkUtil extends RichSinkFunction<Sjyh> {
             preparedStatement.setBigDecimal(16, value.getTran_amt());
             preparedStatement.setString(17, value.getEtl_dt());
 
-            preparedStatement.execute();
+            preparedStatement.addBatch();
+
+            ++count;
+            ++Constant.totalCount;
+            if (count % Constant.INSERT_BATCH_SIZE == 0) { //可能会丢最后几条(小于INSERT_BATCH_SIZE条)
+                preparedStatement.executeBatch();
+                //提交，批量插入数据库中
+                connection.commit();
+                preparedStatement.clearBatch();
+            }
+            if (Constant.totalCount % Constant.INSERT_LOG_SIZE == 0) {
+                System.out.println("共已插入 " + Constant.totalCount + " 条数据");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

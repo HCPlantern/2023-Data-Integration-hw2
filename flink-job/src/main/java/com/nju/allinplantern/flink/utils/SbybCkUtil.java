@@ -14,7 +14,6 @@ import java.util.Map;
 
 
 public class SbybCkUtil extends RichSinkFunction<Sbyb> {
-
     // ck 连接
     private ClickHouseConnection connection;
 
@@ -22,6 +21,9 @@ public class SbybCkUtil extends RichSinkFunction<Sbyb> {
 
     // 对应的 sql
     private static final String sql = "INSERT INTO dm_v_tr_sbyb_mx(uid,cust_name,tran_date,tran_sts,tran_org,tran_teller_no,tran_amt_fen,tran_type,return_msg,etl_dt) VALUES (?,?,?,?,?,?,?,?,?,?)";
+
+    // 数据条目计数器
+    private static int count = 0;
 
     @Override
     public void open(Configuration parameters) throws Exception {
@@ -52,8 +54,6 @@ public class SbybCkUtil extends RichSinkFunction<Sbyb> {
                 connection = dataSource.getConnection();
                 connection.setAutoCommit(false);
                 preparedStatement = connection.prepareStatement(sql);
-            } else {
-                System.out.println("无需重新建立连接");
             }
             preparedStatement.setString(1, value.getUid());
             preparedStatement.setString(2, value.getCust_name());
@@ -66,7 +66,19 @@ public class SbybCkUtil extends RichSinkFunction<Sbyb> {
             preparedStatement.setString(9, value.getReturn_msg());
             preparedStatement.setString(10, value.getEtl_dt());
 
-            preparedStatement.execute();
+            preparedStatement.addBatch();
+
+            ++count;
+            ++Constant.totalCount;
+            if (count % Constant.INSERT_BATCH_SIZE == 0) { //可能会丢最后几条(小于INSERT_BATCH_SIZE条)
+                preparedStatement.executeBatch();
+                //提交，批量插入数据库中
+                connection.commit();
+                preparedStatement.clearBatch();
+            }
+            if (Constant.totalCount % Constant.INSERT_LOG_SIZE == 0) {
+                System.out.println("共已插入 " + Constant.totalCount + " 条数据");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

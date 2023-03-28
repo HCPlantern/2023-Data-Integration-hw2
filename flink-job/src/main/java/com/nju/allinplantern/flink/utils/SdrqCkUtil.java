@@ -14,7 +14,6 @@ import java.util.Map;
 
 
 public class SdrqCkUtil extends RichSinkFunction<Sdrq> {
-
     // ck 连接
     private ClickHouseConnection connection;
 
@@ -22,6 +21,9 @@ public class SdrqCkUtil extends RichSinkFunction<Sdrq> {
 
     // 对应的 sql
     private static final String sql = "INSERT INTO dm_v_tr_sdrq_mx(hosehld_no,acct_no,cust_name,tran_type,tran_date,tran_amt_fen,channel_flg,tran_org,tran_teller_no,tran_log_no,batch_no,tran_sts,return_msg,etl_dt,uid) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+    // 数据条目计数器
+    private static int count = 0;
 
     @Override
     public void open(Configuration parameters) throws Exception {
@@ -52,8 +54,6 @@ public class SdrqCkUtil extends RichSinkFunction<Sdrq> {
                 connection = dataSource.getConnection();
                 connection.setAutoCommit(false);
                 preparedStatement = connection.prepareStatement(sql);
-            } else {
-                System.out.println("无需重新建立连接");
             }
             preparedStatement.setString(1, value.getHosehld_no());
             preparedStatement.setString(2, value.getAcct_no());
@@ -71,7 +71,19 @@ public class SdrqCkUtil extends RichSinkFunction<Sdrq> {
             preparedStatement.setString(14, value.getEtl_dt());
             preparedStatement.setString(15, value.getUid());
 
-            preparedStatement.execute();
+            preparedStatement.addBatch();
+
+            ++count;
+            ++Constant.totalCount;
+            if (count % Constant.INSERT_BATCH_SIZE == 0) { //可能会丢最后几条(小于INSERT_BATCH_SIZE条)
+                preparedStatement.executeBatch();
+                //提交，批量插入数据库中
+                connection.commit();
+                preparedStatement.clearBatch();
+            }
+            if (Constant.totalCount % Constant.INSERT_LOG_SIZE == 0) {
+                System.out.println("共已插入 " + Constant.totalCount + " 条数据");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

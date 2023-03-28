@@ -10,6 +10,7 @@ import ru.yandex.clickhouse.ClickHouseConnection;
 import ru.yandex.clickhouse.ClickHouseDataSource;
 import ru.yandex.clickhouse.settings.ClickHouseProperties;
 import ru.yandex.clickhouse.settings.ClickHouseQueryParam;
+
 import java.sql.PreparedStatement;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,6 +26,9 @@ public class {_Po_class_name}CkUtil extends RichSinkFunction<{_Po_class_name}> {
 
     // 对应的 sql
     private static final String sql = \"{_sql}\";
+    
+    // 数据条目计数器
+    private static int count = 0;
 
     @Override
     public void open(Configuration parameters) throws Exception {{
@@ -42,13 +46,12 @@ public class {_Po_class_name}CkUtil extends RichSinkFunction<{_Po_class_name}> {
     @Override
     public void invoke({_Po_class_name} value, Context context) throws Exception {{
         // 具体的sink处理
-        String url = \"jdbc:clickhouse://clickhouse:8123/dm\";
         ClickHouseProperties properties = new ClickHouseProperties();
         properties.setUser(\"default\");
         properties.setPassword(\"16d808ef\");
         properties.setSessionId(\"default-session-id\");
 
-        ClickHouseDataSource dataSource = new ClickHouseDataSource(url, properties);
+        ClickHouseDataSource dataSource = new ClickHouseDataSource(Constant.getInstance().url, properties);
         Map<ClickHouseQueryParam, String> additionalDBParams = new HashMap<>();
         additionalDBParams.put(ClickHouseQueryParam.SESSION_ID, \"new-session-id\");
         try {{
@@ -56,11 +59,21 @@ public class {_Po_class_name}CkUtil extends RichSinkFunction<{_Po_class_name}> {
                 connection = dataSource.getConnection();
                 connection.setAutoCommit(false);
                 preparedStatement = connection.prepareStatement(sql);
-            }} else {{
-                System.out.println(\"无需重新建立连接\");
             }}
             {_setters}
-            preparedStatement.execute();
+            preparedStatement.addBatch();
+            
+            ++count;
+            ++Constant.totalCount;
+            if (count % Constant.INSERT_BATCH_SIZE == 0) {{ //可能会丢最后几条(小于INSERT_BATCH_SIZE条)
+                preparedStatement.executeBatch();
+                //提交，批量插入数据库中
+                connection.commit();
+                preparedStatement.clearBatch();
+            }}
+            if (Constant.totalCount % Constant.INSERT_LOG_SIZE == 0) {{
+                System.out.println("共已插入 " + Constant.totalCount + " 条数据");
+            }}
         }} catch (Exception e) {{
             e.printStackTrace();
         }}
@@ -113,7 +126,8 @@ def create_file():
         utilClass.write(IMPORT_TEMPLATE.format(_Po_class_name=po_class_name))
         utilClass.write(CLASS_TEMPLATE.format(_Po_class_name=po_class_name,
                                               _sql=generate_sql(),
-                                              _setters=generate_setters()))
+                                              _setters=generate_setters(),
+                                              _po_class_name=po_class_name.lower()))
 
 
 def generate_sql():

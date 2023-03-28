@@ -14,7 +14,6 @@ import java.util.Map;
 
 
 public class GrwyCkUtil extends RichSinkFunction<Grwy> {
-
     // ck 连接
     private ClickHouseConnection connection;
 
@@ -52,8 +51,6 @@ public class GrwyCkUtil extends RichSinkFunction<Grwy> {
                 connection = dataSource.getConnection();
                 connection.setAutoCommit(false);
                 preparedStatement = connection.prepareStatement(sql);
-            } else {
-                System.out.println("无需重新建立连接");
             }
             preparedStatement.setString(1, value.getUid());
             preparedStatement.setString(2, value.getMch_channel());
@@ -73,7 +70,13 @@ public class GrwyCkUtil extends RichSinkFunction<Grwy> {
             preparedStatement.setBigDecimal(16, value.getTran_amt());
             preparedStatement.setString(17, value.getEtl_dt());
 
-            preparedStatement.execute();
+            preparedStatement.execute(); // 数据条目少，不打包插入
+
+            ++Constant.totalCount;
+
+            if (Constant.totalCount % Constant.INSERT_LOG_SIZE == 0) {
+                System.out.println("共已插入 " + Constant.totalCount + " 条数据");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
