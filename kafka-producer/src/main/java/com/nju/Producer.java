@@ -87,12 +87,16 @@ public class Producer {
             try {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
                 String read_in = "";
+                long produceCount = 0L;
                 while (true) {
                     try {
                         if ((read_in = reader.readLine()) != null) {
                             ProducerRecord<String, String> record = new ProducerRecord<>(topic, 0, null, read_in);
-                            System.out.println(read_in);
                             producer.send(record);
+                            if (produceCount % 10000 == 0) {
+                                System.out.println("信息数量：" + produceCount + "，当前时间是：" + System.currentTimeMillis());
+                            }
+                            produceCount++;
                             if (++sleep_counter == sleepCounterMax) {
                                 sleep_counter = 0;
                                 Thread.sleep(sleepTime);
