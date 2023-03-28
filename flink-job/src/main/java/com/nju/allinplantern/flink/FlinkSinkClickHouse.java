@@ -118,13 +118,10 @@ public class FlinkSinkClickHouse {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
         Constant constant = Constant.getInstance();
-        for (int i = 0; i < args.length; i++) {
-            if (args[i].equals("-conf")) {
-                constant.initialize(args[i + 1]);
-            } else {
-                System.err.println("Please specify the configuration file path by -conf argument.");
-                System.exit(-1);
-            }
+        if (args[0].equals("-conf")) {
+            constant.initialize(args[1]);
+        }else {
+            System.exit(-1);
         }
         // 定义 flink kafka consumer
         FlinkKafkaConsumer<String> consumer = new FlinkKafkaConsumer<>(constant.topic, new SimpleStringSchema(), constant.properties);
