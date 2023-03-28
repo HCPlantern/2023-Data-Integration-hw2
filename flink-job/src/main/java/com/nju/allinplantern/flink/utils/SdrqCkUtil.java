@@ -54,8 +54,6 @@ public class SdrqCkUtil extends RichSinkFunction<Sdrq> {
                 connection = dataSource.getConnection();
                 connection.setAutoCommit(false);
                 preparedStatement = connection.prepareStatement(sql);
-            } else {
-                System.out.println("无需重新建立连接");
             }
             preparedStatement.setString(1, value.getHosehld_no());
             preparedStatement.setString(2, value.getAcct_no());
@@ -73,21 +71,15 @@ public class SdrqCkUtil extends RichSinkFunction<Sdrq> {
             preparedStatement.setString(14, value.getEtl_dt());
             preparedStatement.setString(15, value.getUid());
 
-
             preparedStatement.addBatch();
 
             ++count;
             ++Constant.totalCount;
-            int[] successLines;
             if (count % Constant.INSERT_BATCH_SIZE == 0) { //可能会丢最后几条(小于INSERT_BATCH_SIZE条)
-                successLines = preparedStatement.executeBatch();
+                preparedStatement.executeBatch();
                 //提交，批量插入数据库中
                 connection.commit();
                 preparedStatement.clearBatch();
-                //这里统计的是该type的插入量
-//              if (count % Constant.INSERT_LOG_SIZE == 0)
-//                  System.out.println("dm.dm_v_tr_sdrq_mx：第" + count + "条数据，" + "成功了插入了" +
-//                          successLines.length + "行数据");
             }
             if (Constant.totalCount % Constant.INSERT_LOG_SIZE == 0) {
                 System.out.println("共已插入 " + Constant.totalCount + " 条数据");

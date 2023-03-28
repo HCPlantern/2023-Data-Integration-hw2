@@ -22,9 +22,6 @@ public class GrwyCkUtil extends RichSinkFunction<Grwy> {
     // 对应的 sql
     private static final String sql = "INSERT INTO dm_v_tr_grwy_mx(uid,mch_channel,login_type,ebank_cust_no,tran_date,tran_time,tran_code,tran_sts,return_code,return_msg,sys_type,payer_acct_no,payer_acct_name,payee_acct_no,payee_acct_name,tran_amt,etl_dt) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
-    // 数据条目计数器
-    private static int count = 0;
-
     @Override
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
@@ -54,8 +51,6 @@ public class GrwyCkUtil extends RichSinkFunction<Grwy> {
                 connection = dataSource.getConnection();
                 connection.setAutoCommit(false);
                 preparedStatement = connection.prepareStatement(sql);
-            } else {
-                System.out.println("无需重新建立连接");
             }
             preparedStatement.setString(1, value.getUid());
             preparedStatement.setString(2, value.getMch_channel());
@@ -75,22 +70,10 @@ public class GrwyCkUtil extends RichSinkFunction<Grwy> {
             preparedStatement.setBigDecimal(16, value.getTran_amt());
             preparedStatement.setString(17, value.getEtl_dt());
 
+            preparedStatement.execute(); // 数据条目少，不打包插入
 
-            preparedStatement.addBatch();
-
-            ++count;
             ++Constant.totalCount;
-            int[] successLines;
-            if (count % Constant.INSERT_BATCH_SIZE == 0) { //可能会丢最后几条(小于INSERT_BATCH_SIZE条)
-                successLines = preparedStatement.executeBatch();
-                //提交，批量插入数据库中
-                connection.commit();
-                preparedStatement.clearBatch();
-                //这里统计的是该type的插入量
-//              if (count % Constant.INSERT_LOG_SIZE == 0)
-//                  System.out.println("dm.dm_v_tr_grwy_mx：第" + count + "条数据，" + "成功了插入了" +
-//                          successLines.length + "行数据");
-            }
+
             if (Constant.totalCount % Constant.INSERT_LOG_SIZE == 0) {
                 System.out.println("共已插入 " + Constant.totalCount + " 条数据");
             }

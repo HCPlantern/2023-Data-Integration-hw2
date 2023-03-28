@@ -18,7 +18,7 @@ public class Constant {
     /**
      * 批量插入数
      */
-    public static final int INSERT_BATCH_SIZE = 500;
+    public static final int INSERT_BATCH_SIZE = 100;
 
     /**
      * 日志输出步长
