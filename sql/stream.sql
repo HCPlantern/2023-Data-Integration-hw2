@@ -352,7 +352,7 @@ CREATE TABLE stream.dm_v_tr_sdrq_mx (
 ENGINE = MergeTree
 ORDER BY hosehld_no;
 
-CREATE TABLE stream.v_tr_shop_mx (
+CREATE TABLE stream.dm_v_tr_shop_mx (
     tran_channel String,
     order_code String,
     shop_code String,
