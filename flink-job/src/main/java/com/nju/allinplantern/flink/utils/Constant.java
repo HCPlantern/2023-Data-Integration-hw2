@@ -25,6 +25,11 @@ public class Constant {
      */
     public static final int INSERT_LOG_SIZE = 10000;
 
+    /**
+     * 总数据条目已插入数
+     */
+    public static int totalCount = 0;
+
     private Constant() {
     }
 

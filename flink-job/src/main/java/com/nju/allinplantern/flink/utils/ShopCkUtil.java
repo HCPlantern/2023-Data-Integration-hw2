@@ -76,15 +76,20 @@ public class ShopCkUtil extends RichSinkFunction<Shop> {
             preparedStatement.addBatch();
 
             ++count;
+            ++Constant.totalCount;
             int[] successLines;
             if (count % Constant.INSERT_BATCH_SIZE == 0) { //可能会丢最后几条(小于INSERT_BATCH_SIZE条)
                 successLines = preparedStatement.executeBatch();
                 //提交，批量插入数据库中
                 connection.commit();
                 preparedStatement.clearBatch();
-                if (count % Constant.INSERT_LOG_SIZE == 0)
-                    System.out.println("dm.dm_v_tr_shop_mx：第" + count + "条数据，" + "成功了插入了" +
-                            successLines.length + "行数据");
+                //这里统计的是该type的插入量
+//              if (count % Constant.INSERT_LOG_SIZE == 0)
+//                  System.out.println("dm.dm_v_tr_shop_mx：第" + count + "条数据，" + "成功了插入了" +
+//                          successLines.length + "行数据");
+            }
+            if (Constant.totalCount % Constant.INSERT_LOG_SIZE == 0) {
+                System.out.println("共已插入 " + Constant.totalCount + " 条数据");
             }
         } catch (Exception e) {
             e.printStackTrace();
