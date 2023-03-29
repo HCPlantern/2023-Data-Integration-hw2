@@ -80,8 +80,14 @@ public class FlinkSinkClickHouse {
      */
     public List<DataStream<String>> splitDataStream(DataStreamSource<String> source) {
         return Arrays.stream(eventTypes).map(eventType -> source.filter((FilterFunction<String>) s -> {
-            HashMap<String, String> event = JSON.parseObject(s, HashMap.class);
-            return event.get("eventType").equalsIgnoreCase(eventType);
+            try {
+                HashMap<String, String> event = JSON.parseObject(s, HashMap.class);
+                return event.get("eventType").equalsIgnoreCase(eventType);
+            } catch (Exception e) {
+                // JSON 错误
+                e.printStackTrace();
+                return false;
+            }
         })).collect(Collectors.toList());
     }
 
@@ -120,7 +126,7 @@ public class FlinkSinkClickHouse {
         Constant constant = Constant.getInstance();
         if (args[0].equals("-conf")) {
             constant.initialize(args[1]);
-        }else {
+        } else {
             System.exit(-1);
         }
         // 定义 flink kafka consumer
