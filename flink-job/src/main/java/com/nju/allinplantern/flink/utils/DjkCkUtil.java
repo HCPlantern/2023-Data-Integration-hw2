@@ -83,7 +83,7 @@ public class DjkCkUtil extends RichSinkFunction<Djk> {
                 preparedStatement.clearBatch();
             }
             if (Constant.totalCount % Constant.INSERT_LOG_SIZE == 0) {
-                System.out.println("共已插入 " + Constant.totalCount + " 条数据");
+                System.out.println(System.currentTimeMillis() + ": " + "共已插入 " + Constant.totalCount + " 条数据");
             }
         } catch (Exception e) {
             e.printStackTrace();
