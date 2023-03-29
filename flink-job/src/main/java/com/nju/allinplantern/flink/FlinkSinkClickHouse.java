@@ -132,7 +132,6 @@ public class FlinkSinkClickHouse {
         // 定义 flink kafka consumer
         FlinkKafkaConsumer<String> consumer = new FlinkKafkaConsumer<>(constant.topic, new SimpleStringSchema(), constant.properties);
         consumer.setStartFromGroupOffsets();
-        consumer.setStartFromEarliest();
 
 
         // 设置数据源
