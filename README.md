@@ -76,7 +76,7 @@
 
 docker-compose.yaml 文件如下：
 
-```yaml=
+```yaml
 version: '3'
 
 services:
