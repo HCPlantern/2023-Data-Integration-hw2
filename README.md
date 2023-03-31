@@ -146,7 +146,7 @@ networks:
 
 docker-compose.yaml 文件如下：
 
-```yaml=
+```yaml
 version: "3"
 services:
   zookeeper:
@@ -224,7 +224,7 @@ services:
 
 docker-compose.yaml 文件如下
 
-```yaml=
+```yaml
 version: '3'
 
 services:
@@ -280,12 +280,33 @@ JPS 一览：
 
 ![](https://i.imgur.com/SZVR9Z1.png)
 
+运行一次我们的 Spark 任务总用时约为 34min。
+
 
 ## 5. 流式数据部分 @wpp @hcx
 
 ### 5.1 代码流程说明
 
 ### 5.2 效果展示
+
+我们根据 Flink 的处理能力控制了消息的推送速度。在一次 Flink Job 中，Kafka 消息的推送速率如下：
+
+![](https://i.imgur.com/w2imFkq.png)
+
+开始部分推送速率维持在 6k/s 左右，后续可能由于主机散热受限，推送速率下降至 4k/s 左右。总推送平均速率为 4.7k /s 左右。
+
+Flink Job 消费端部分的消费速度与推送速度接近。根据我们的观察，在刚开始时消息挤压的总消息量为 60w 条，由于后续生产者推送速度的下降，挤压量并未明显上升，全程维持在 100w 以下的水平。
+
+运行 50 分钟之后的情况截图：
+![](https://i.imgur.com/xzZgYkE.png)
+
+![](https://i.imgur.com/U7kZotr.png)
+
+最终，推送消息用时 90分钟，Flink Job 总用时 93 分钟左右。
+
+![](https://i.imgur.com/PYumrYu.png)
+
+
 
 ## 6. 可视化部分
 
