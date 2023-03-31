@@ -53,11 +53,222 @@
 | Kafka*       | bitnami/kafka:2.1.0          |                         |
 | Kafka Eagle* | nickzurich/kafka-eagle:2.1.0 | 用于监视 Kafka 并展示信息，内存占用较大 |
 | Clickhouse*  | clickhouse-server:latest     |                         |
-| Dataease*    |                              | 可视化平台，内存占用极大    |
+| Dataease*    |registry.cn-qingdao.aliyuncs.com/dataease/dataease:v1.18.5| 可视化平台    |
 
 
 
 ### 3.3 搭建过程
+
+#### 3.3.1 宝塔面板
+
+运行官网脚本即可。
+
+#### 3.3.2 JDK Hadoop Spark
+
+完全按照以下参考资料进行安装：
+1. [hadoop 2.7.4 单机版安装](https://blog.csdn.net/isoleo/article/details/78394777)
+2. [spark2.4的安装和基本使用](https://blog.csdn.net/walkcode/article/details/104208855)
+
+#### 3.3.3 Flink
+
+我们选择了 Docker Hub 中 [flink:1.13.5-scala_2.11-java8](https://hub.docker.com/_/flink) 这个镜像，具体部署参考了：
+- http://web.archive.org/web/20220828125423/https://www.awaimai.com/2934.html
+
+docker-compose.yaml 文件如下：
+
+```yaml=
+version: '3'
+
+services:
+  jobmanager:
+    container_name: jobmanager
+    image: flink:1.13.5-scala_2.11-java8
+    restart: always
+    ports:
+      - 8090:8081
+    command: jobmanager
+    environment:
+      - TZ=Asia/Shanghai
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+      - |
+        FLINK_PROPERTIES=
+        taskmanager.numberOfTaskSlots: 4
+        jobmanager.memory.process.size: 2600m
+        taskmanager.memory.process.size: 2728m
+        taskmanager.memory.flink.size: 2280m
+    volumes:
+      - ./data:/opt/flink/data
+    networks:
+      - clickhouse_default
+      - kafka_default
+
+  taskmanager:
+    container_name: taskmanager
+    image: flink:1.13.5-scala_2.11-java8
+    restart: always
+    expose:
+      - "6121"
+      - "6122"
+    depends_on:
+      - jobmanager
+    command: taskmanager
+    links:
+      - "jobmanager:jobmanager"
+    environment:
+      - TZ=Asia/Shanghai
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+      - |
+        FLINK_PROPERTIES=
+        taskmanager.numberOfTaskSlots: 4
+        jobmanager.memory.process.size: 2600m
+        taskmanager.memory.process.size: 2728m
+        taskmanager.memory.flink.size: 2280m
+    volumes:
+      - ./data:/opt/flink/data
+    networks:
+      - clickhouse_default
+      - kafka_default
+
+networks:
+  clickhouse_default:
+    external: true
+  kafka_default:
+    external: true
+
+```
+
+该部分依赖 Kafka 以及 Clickhouse 的网络。基于该镜像我们分别部署了 jobmanager 以及 taskmanager 这两个 docker 服务。
+
+#### 3.3.4 Zookeeper & Kafka & Kafka Eagle
+
+该部分我们参考了：
+- [Kafka(Go)教程(一)---通过docker-compose 安装 Kafka](https://www.lixueduan.com/posts/kafka/01-install/)
+
+docker-compose.yaml 文件如下：
+
+```yaml=
+version: "3"
+services:
+  zookeeper:
+    image: 'bitnami/zookeeper:3.5'
+    user: root
+    container_name: zookeeper
+    restart: always
+    ports:
+      - '2181:2181'
+    environment:
+      # 匿名登录--必须开启
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    volumes:
+      - ./zookeeper:/bitnami/zookeeper
+  kafka:
+    image: 'bitnami/kafka:2.1.0'
+    user: root
+    container_name: kafka
+    restart: always
+    ports:
+      - '9092:9092'
+      - '9999:9999'
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_LISTENERS=PLAINTEXT://:9092
+      # 客户端访问地址，更换成自己的
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      # 允许使用PLAINTEXT协议(镜像中默认为关闭,需要手动开启)
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      # 关闭自动创建 topic 功能
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=false
+      # 全局消息过期时间 6 小时(测试时可以设置短一点)
+      - KAFKA_LOG_RETENTION_HOURS=6
+      # 开启JMX监控
+      - JMX_PORT=9999
+    volumes:
+      - ./kafka:/bitnami/kafka
+    depends_on:
+      - zookeeper
+  kafka-eagle:
+      image: nickzurich/kafka-eagle:2.1.0
+      container_name: kafka-eagle
+      restart: unless-stopped
+      environment:
+        - TZ=Asia/Shanghai
+        - EFAK_CLUSTER_ZK_LIST=zookeeper:2181
+        - EFAK_DB_DRIVER=com.mysql.jdbc.Driver
+        - EFAK_DB_USERNAME=root
+        - EFAK_DB_PASSWORD=123456
+        - EFAK_DB_URL=jdbc:mysql://mysql:3306/ke?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull
+      depends_on:
+        - kafka
+        - mysql
+      ports:
+        - 8048:8048
+  mysql:
+    image: mysql
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+
+```
+
+该部分部署了四个服务，其中 Zookeer 和 Kafka 使用了助教推荐的版本，镜像由 bitnami 提供；Kafka Ealge 用于监控 Kafka 实时数据，MySql 是 Kafka Eagle 的数据库服务。
+
+在部署时，我们遇到了一些坑：
+1. Kafka 选择 2.1.0 镜像，按照教程启动后无法连接 zookeeper，经过 docker inspect 之后发现是 zookeeper 连接地址的环境变量的字段在新版本更新过（KAFKA_ZOOKEEPER_CONNECT -> KAFKA_CFG_ZOOKEEPER_CONNECT）。修改为旧字段之后成功连接。
+2. Bitnami 提供的容器默认使用 Non-Root Containers，导致添加 volumes 时容器内因无权限创建文件夹而报错 Permission Denied。解决办法是在 docker-compose.yaml 中添加一行配置 user:root
+
+#### 3.3.5 Clickhouse
+
+我们选择的镜像为 [yandex/clickhouse-server:latest](https://hub.docker.com/r/yandex/clickhouse-server)，参考了如下教程：
+- [ClickHouse 简单部署&使用测试](https://zhuanlan.zhihu.com/p/383817560)
+
+docker-compose.yaml 文件如下
+
+```yaml=
+version: '3'
+
+services:
+  clickhouse:
+    container_name: clickhouse
+    image: yandex/clickhouse-server:latest 
+    restart: always
+    ports:
+      - '8123:8123' # HTTP
+      - '9001:9000' # TCP
+      - '9009:9009' # Inter-server HTTP port
+    volumes: 
+      # 默认配置 写入config.d/users.d 目录防止更新后文件丢失
+      - ./config.xml:/etc/clickhouse-server/config.d/config.xml:rw
+      - ./users.xml:/etc/clickhouse-server/users.xml:rw
+      # 运行日志
+      - ./logs:/var/log/clickhouse-server
+      # 数据持久
+      - ./data:/var/lib/clickhouse:rw
+```
+
+由于端口冲突，这里将 TCP 端口映射为了 9001。
+
+#### 3.3.6 Dataease
+
+该部分参考官网部署文档，直接运行脚本即可：
+
+```bash!
+curl -sSL https://dataease.oss-cn-hangzhou.aliyuncs.com/quick_start.sh | sh
+```
+
+为了使该可视化平台能够在公网运行，我们借助了一台公网服务器进行反向代理。具体制作的可视化作品请参照本文档的可视化部分。
+
+#### 3.3.7 总结
+
+docker 服务一览：
+
+![](https://i.imgur.com/62wALsN.png)
+
+JPS 一览：
+
+![](https://i.imgur.com/67eSpUd.png)
+
+
 
 ## 4. 数据库表部分 @hgs @zym
 
@@ -77,3 +288,26 @@
 ### 5.2 效果展示
 
 ## 6. 可视化部分
+
+本部分我们借助了开源数据可视化分析工具 [Dataease](https://dataease.io/) 完成该部分任务。该平台部署在主机上，并通过公网服务器反向代理到公网，以便于公网访问。
+
+在线访问地址：
+1. 各类交易数据: https://dataease.hcplantern.cn/link/hfFAUWJQ
+2. 银行账户数据: https://dataease.hcplantern.cn/link/xJo6XXzf
+
+### 6.1 各类交易数据
+
+该场景中我们按照日期展示了各消费类型的消费总额，以及在某一时间内手机银行交易数额 TOP 20 的用户。
+
+![](https://i.imgur.com/RUjpeie.png)
+
+### 6.2 银行账户信息
+
+该场景中我们展示了所有银行帐户中定期余额和贷款余额的占比，并按照日期展示贷款还本和贷款还息的总额，最后统计了合同的分类等级情况，以便于银行根据当日数据规划资金安排。
+
+![](https://i.imgur.com/BblvomF.png)
+
+
+
+
+
