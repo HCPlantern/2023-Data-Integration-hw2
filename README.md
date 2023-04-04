@@ -6,13 +6,13 @@
 
 **小组编号：4**
 
-| 姓名   | 学号      | 分工 |
-| ------ | --------- | ---- |
-| 万沛沛 | 201250038 | Flink 流数据处理部分     |
-| 邓尤亮 | 201250035 | 主机环境配置、可视化部分、获取助教 Kfaka 数据     |
-| 韩陈旭 | 201250037 | Flink 流数据处理部分     |
-| 张月明 | 201830115 | 数据库表批处理部分、Kafka 生产者     |
-| 华广松 | 201840309 | 数据库表批处理部分、Kafka 生产者     |
+| 姓名   | 学号      |                     分工                      |
+| ------ | --------- |:---------------------------------------------:|
+| 万沛沛 | 201250038 |             Flink 流数据处理部分              |
+| 邓尤亮 | 201250035 | 主机环境配置、可视化部分、获取助教 Kfaka 数据 |
+| 韩陈旭 | 201250037 |             Flink 流数据处理部分              |
+| 张月明 | 201830115 |       数据库表批处理部分、Kafka 生产者        |
+| 华广松 | 201840309 |       数据库表批处理部分、Kafka 生产者        |
 
 ## 2. 项目文件
 
@@ -268,6 +268,40 @@ JPS 一览：
 
 ![](https://i.imgur.com/67eSpUd.png)
 
+### 3.4 如何运行
+
+#### 3.4.1 启动环境
+
+对于使用 Docker 的服务来说，运行 `docker-compose up -d` 即可
+
+对于 Spark 和 Hadoop，分别运行 `hadoop/sbin/start-all.sh` 和 `spark/sbin/start-all.sh` 即可
+
+#### 3.4.2 运行程序
+
+Spark 分析程序：
+
+```bash
+cd /usr/local/spark/spark-2.3.3
+
+bin/spark-submit \             
+--master=spark://hcplantern-ubuntu:7077 \      
+--class=org.apache.spark.examples.JavaSparkPi \
+examples/jars/spark-examples_2.11-2.3.3.jar
+```
+
+使用 spark-submit 提交任务。
+
+Kafka Producer：
+
+```bash!
+nohup java -jar kafka-producer_with_sleep.jar -conf producer.config > producer.log 2>&1 &
+```
+
+Flink Job:
+
+在 Flink Web 界面提交，如图所示：
+
+![](https://i.imgur.com/9ZjJ3mQ.png)
 
 
 ## 4. 数据库表部分
