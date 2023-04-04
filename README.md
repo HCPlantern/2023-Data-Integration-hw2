@@ -373,7 +373,7 @@ df = df.withColumn("contact_address", col("con_type") + 1) //添加新列
 
 接着将dataFrame转换成rdd进行操作，rdd.map()对每行数据进行映射得到rdd[k,v]格式：（uid,ListBuffer)。其中ListBuffer: 0:`con_type` 1:`contact` 2:`contact_phone` 3:`contact_address` ,使用逗号分隔,之后对`con_type`判断来填充ListBuffer。
 
-```scala=
+```scala
 var res = df.rdd.map(row => row.getAs("uid").toString -> ListBuffer[String](row.getAs("con_type").toString, row.getAs("contact").toString, "", ""))
 //对con_type判断来填充ListBuffer
 res = res.map(item => {
@@ -388,7 +388,7 @@ res = res.map(item => {
 ```
 
 最后将rdd两两聚合，r1、r2为key相同的两个value,将r2的信息合并到r1上
-```scala=
+```scala
 res = res.reduceByKey((r1, r2) => {
     if (r2.head == "TEL" || r2.head == "OTH" || r2.head == "MOB") {
         if (r1(2).nonEmpty) {
@@ -453,7 +453,7 @@ df = df.dropDuplicates()
 
 #### 4.1.2.3 数据存入ClickHouse
 利用官方驱动`com.github.housepower.jdbc.ClickHouseDriver`完成
-```scale=
+```scala
 val write_maps = Map[String, String](
     "batchsize" -> "2000",
     "isolationLevel" -> "NONE",
@@ -499,7 +499,7 @@ df.write.mode(SaveMode.Append)
 
 核心代码如下：
 
-```java=
+```java
 public void produce() {
     long sleepCounterMax = Long.parseLong(config.getProperty("sleepCounterMax"));
     long sleepTime = Long.parseLong(config.getProperty("sleepTime"));
@@ -542,14 +542,14 @@ public void produce() {
 我们创建了 `FlinkSinkClickHouse` 类来实现整个 Flink ETL 的逻辑。
 
 首先定义了 `FlinkKafkaConsumer` 用于连接 Kafka 并且消费特定主题下的数据，每次消费指定从上一次消费后的 groupOffset 开始消费，确保不会出现重复消费的问题：
-```java=
+```java
 // 定义 flink kafka consumer
 FlinkKafkaConsumer<String> consumer = new FlinkKafkaConsumer<>(constant.topic, new SimpleStringSchema(), constant.properties);
 // 设置 Offset, 防止重复消费 
 consumer.setStartFromGroupOffsets();
 ```
 之后我们根据流式数据中的 `eventType` 字段对不同的流式数据进行了分流，保证不同的流式数据可以被并行处理：
-```java=
+```java
 /**
  * 分割数据流 并行处理
  *
@@ -574,7 +574,7 @@ public List<DataStream<String>> splitDataStream(DataStreamSource<String> source)
 在设计上，由于每种流式数据都包含许多字段并且有特定的含义，我们设计了能够表征流式数据的 POJO 类封装对应的字段，完成了流式数据的转换(具体的 POJO 类见 pojo/eventbody 包)。
 
 在编写 Flink Operator 时，我们考虑到如果对每种流式数据都编写对应的 operator 进行转换会造成大量的代码冗余，所以我们使用了泛型+反射的方式将流式数据转换成对应的 POJO 类，具体的代码如下：
-```java=
+```java
 /**
  * 创建对应的算子
  */
@@ -607,7 +607,7 @@ public <T extends EventBody> SingleOutputStreamOperator<T> createFlinkOperator(D
 在使用 Flink Operator 对流式数据完成转换之后，我们对每一种流式数据创建了对应的 SinkFunction 将数据 sink 到 ClickHouse 中。
 
 具体来说，我们继承了 `RichSinkFunction` 这个类，并且重写了其中的 `invoke` 方法将数据最终插入 ClickHouse。在插入数据的时候，我们设置了对应的批量插入数 `INSERT_BATCH_SIZE` 用来提高插入的速度，并且记录响应的插入数据的速率。具体的代码实现如下(以 Contract 流式数据为例)：
-```java=
+```java
 @Override
 public void invoke(Contract value, Context context) throws Exception {
     // 具体的sink处理
